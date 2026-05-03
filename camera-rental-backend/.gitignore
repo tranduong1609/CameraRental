@@ -1,0 +1,3 @@
+# Tạo file .gitignore — Tránh lộ password lên GitHub!
+.env
+node_modules/
