@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Search, Star, X } from 'lucide-react';
 import { cameraApi } from '../services/api';
 
@@ -13,6 +13,7 @@ const SORT_OPTIONS = [
 const formatPrice = (p: number) => p.toLocaleString('vi-VN') + 'đ';
 
 export default function ProductsPage() {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [categories, setCategories] = useState<any[]>([]);
   const [cameras, setCameras] = useState<any[]>([]);
@@ -104,10 +105,28 @@ export default function ProductsPage() {
               const ed = searchParams.get('end_date');
               const dateQuery = sd && ed ? `?start_date=${sd}&end_date=${ed}` : '';
               return (
-              <Link to={`/product/${cam._id}${dateQuery}`} key={cam._id} className="card product-card animate-fade-in" style={{ animationDelay: `${(i % 12) * 0.04}s` }}>
+              <div 
+                key={cam._id} 
+                className="card product-card animate-fade-in" 
+                style={{ animationDelay: `${(i % 12) * 0.04}s`, cursor: 'pointer' }}
+                onClick={(e) => {
+                  if (!sd || !ed) {
+                    e.preventDefault();
+                    alert('Vui lòng quay lại Trang chủ để chọn khoảng ngày thuê trước khi xem chi tiết thiết bị.');
+                  } else {
+                    navigate(`/product/${cam._id}${dateQuery}`);
+                  }
+                }}
+              >
                 <div className="card-image-wrapper">
                   {cam.images?.[0] ? <img src={cam.images[0]} alt={cam.name} className="card-image" loading="lazy" /> : <div className="card-image" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40, color: 'var(--text-muted)' }}>📷</div>}
-                  <div className="product-status"><span className={`badge ${(cam.available_quantity ?? 1) > 0 ? 'badge-success' : 'badge-warning'}`}>{(cam.available_quantity ?? 1) > 0 ? `Còn ${cam.available_quantity ?? 1}` : 'Hết'}</span></div>
+                  <div className="product-status">
+                    {sd && ed && (
+                      <span className={`badge ${(cam.dynamic_available_quantity ?? cam.available_quantity ?? 1) > 0 ? 'badge-success' : 'badge-warning'}`}>
+                        {(cam.dynamic_available_quantity ?? cam.available_quantity ?? 1) > 0 ? `Còn ${cam.dynamic_available_quantity ?? cam.available_quantity ?? 1}` : 'Hết'}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div className="card-body">
                   <div className="product-brand">{cam.brand}</div>
@@ -117,7 +136,7 @@ export default function ProductsPage() {
                     {cam.rating_avg > 0 && <div className="product-rating"><Star size={13} fill="var(--star)" color="var(--star)" />{cam.rating_avg.toFixed(1)}</div>}
                   </div>
                 </div>
-              </Link>
+              </div>
               );
             })}
           </div>

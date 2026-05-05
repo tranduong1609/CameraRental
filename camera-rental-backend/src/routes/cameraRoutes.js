@@ -87,6 +87,7 @@ router.get('/', async (req, res) => {
       ];
     }
 
+    let conflictMap = {};
     // Lọc máy trống theo khoảng ngày (loại bỏ máy đã cho thuê hết số lượng trùng ngày)
     if (start_date && end_date) {
       const Booking = require('../models/booking');
@@ -104,6 +105,7 @@ router.get('/', async (req, res) => {
       // Tìm những camera mà số booking trùng ngày >= quantity
       const fullyBookedIds = [];
       for (const agg of conflictAgg) {
+        conflictMap[agg._id.toString()] = agg.count;
         const cam = await Camera.findById(agg._id).select('quantity');
         if (cam && agg.count >= (cam.quantity || 1)) {
           fullyBookedIds.push(agg._id);
@@ -131,8 +133,19 @@ router.get('/', async (req, res) => {
       .limit(Number(limit))
       .populate('store_id', 'name address');
 
+    const processedCameras = cameras.map(cam => {
+      const camObj = cam.toObject();
+      if (start_date && end_date) {
+        const conflictCount = conflictMap[cam._id.toString()] || 0;
+        camObj.dynamic_available_quantity = Math.max(0, (cam.quantity || 1) - conflictCount);
+      } else {
+        camObj.dynamic_available_quantity = cam.quantity || 1;
+      }
+      return camObj;
+    });
+
     res.json({
-      cameras,
+      cameras: processedCameras,
       pagination: {
         page: Number(page),
         limit: Number(limit),
@@ -152,11 +165,27 @@ router.get('/', async (req, res) => {
 // ─────────────────────────────────────
 router.get('/:id', async (req, res) => {
   try {
+    const { start_date, end_date } = req.query;
     const camera = await Camera.findById(req.params.id)
       .populate('store_id', 'name address phone email open_time close_time working_days');
 
     if (!camera) {
       return res.status(404).json({ message: 'Không tìm thấy sản phẩm.' });
+    }
+
+    const camObj = camera.toObject();
+
+    if (start_date && end_date) {
+      const Booking = require('../models/booking');
+      const conflictCount = await Booking.countDocuments({
+        camera_id: camera._id,
+        status: { $nin: ['cancelled', 'refunded', 'completed'] },
+        start_date: { $lt: new Date(end_date) },
+        end_date: { $gt: new Date(start_date) },
+      });
+      camObj.dynamic_available_quantity = Math.max(0, (camera.quantity || 1) - conflictCount);
+    } else {
+      camObj.dynamic_available_quantity = camera.quantity || 1;
     }
 
     // Lấy danh sách review
@@ -166,7 +195,7 @@ router.get('/:id', async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(20);
 
-    res.json({ camera, reviews });
+    res.json({ camera: camObj, reviews });
   } catch (error) {
     console.error('Get camera detail error:', error);
     res.status(500).json({ message: 'Lỗi server.' });

@@ -121,8 +121,13 @@ export const cameraApi = {
     return request<{ cameras: any[]; pagination: any }>(`/cameras${queryStr ? `?${queryStr}` : ''}`);
   },
 
-  getCameraDetail: (id: string) =>
-    request<{ camera: any; reviews: any[] }>(`/cameras/${id}`),
+  getCameraDetail: (id: string, startDate?: string, endDate?: string) => {
+    let url = `/cameras/${id}`;
+    if (startDate && endDate) {
+      url += `?start_date=${startDate}&end_date=${endDate}`;
+    }
+    return request<{ camera: any; reviews: any[] }>(url);
+  },
 };
 
 // ─────────────────────────────────────

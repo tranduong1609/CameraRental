@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Image, FlatList, Dimensions, Platform, Animated, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Image, FlatList, Dimensions, Platform, Animated, StyleSheet, Alert } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams, Stack } from 'expo-router';
 import { cameraApi } from '../../services/api';
 import { useCart } from '../../contexts/CartContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useRental } from '../../contexts/RentalContext';
 
 const { width } = Dimensions.get('window');
 
@@ -53,6 +54,7 @@ export default function ProductDetailsScreen() {
   const [loading, setLoading] = useState(true);
   const [showAllReviews, setShowAllReviews] = useState(false);
   const { addToCart } = useCart();
+  const { startDate, endDate } = useRental();
   const [showToast, setShowToast] = useState(false);
   const toastAnim = useRef(new Animated.Value(0)).current;
 
@@ -67,6 +69,18 @@ export default function ProductDetailsScreen() {
 
   const handleAddToCart = () => {
     if (!camera) return;
+    if (!startDate) {
+      Alert.alert('Chưa chọn ngày thuê', 'Vui lòng quay lại Trang chủ để chọn khoảng thời gian thuê thiết bị trước khi thêm vào giỏ hàng.', [
+        { text: 'Hủy', style: 'cancel' },
+        { text: 'Về Trang chủ', onPress: () => router.push('/(tabs)') }
+      ]);
+      return;
+    }
+    const availQty = camera.dynamic_available_quantity ?? camera.available_quantity ?? 1;
+    if (availQty <= 0) {
+      Alert.alert('Hết hàng', 'Thiết bị này đã được đặt hết trong khoảng thời gian bạn chọn.');
+      return;
+    }
     addToCart(camera);
     setShowToast(true);
     Animated.sequence([
@@ -76,13 +90,31 @@ export default function ProductDetailsScreen() {
     ]).start(() => setShowToast(false));
   };
 
+  const handleBuyNow = () => {
+    if (!camera) return;
+    if (!startDate) {
+      Alert.alert('Chưa chọn ngày thuê', 'Vui lòng quay lại Trang chủ để chọn khoảng thời gian thuê thiết bị trước.', [
+        { text: 'Hủy', style: 'cancel' },
+        { text: 'Về Trang chủ', onPress: () => router.push('/(tabs)') }
+      ]);
+      return;
+    }
+    const availQty = camera.dynamic_available_quantity ?? camera.available_quantity ?? 1;
+    if (availQty <= 0) {
+      Alert.alert('Hết hàng', 'Thiết bị này đã được đặt hết trong khoảng thời gian bạn chọn.');
+      return;
+    }
+    addToCart(camera);
+    router.push('/payment');
+  };
+
   useEffect(() => {
     if (id) loadCamera();
-  }, [id]);
+  }, [id, startDate, endDate]);
 
   const loadCamera = async () => {
     setLoading(true);
-    const res = await cameraApi.getCameraDetail(id!);
+    const res = await cameraApi.getCameraDetail(id!, startDate || undefined, endDate || undefined);
     if (res.ok && res.data) {
       setCamera(res.data.camera);
       setReviews(res.data.reviews || []);
@@ -257,11 +289,13 @@ export default function ProductDetailsScreen() {
             <View style={s.badgeCategory}>
               <Text style={s.badgeCategoryText}>{CATEGORY_LABELS[camera.category]}</Text>
             </View>
-            <View style={[s.badgeStatus, { backgroundColor: (camera.available_quantity ?? 1) > 0 ? '#10B98115' : '#F59E0B15' }]}>
-              <Text style={{ fontSize: 12, fontWeight: '700', color: (camera.available_quantity ?? 1) > 0 ? '#10B981' : '#F59E0B' }}>
-                {(camera.available_quantity ?? 1) > 0 ? `● Sẵn sàng (${camera.available_quantity ?? 1} còn)` : '● Hết hàng'}
-              </Text>
-            </View>
+            {startDate && (
+              <View style={[s.badgeStatus, { backgroundColor: (camera.dynamic_available_quantity ?? camera.available_quantity ?? 1) > 0 ? '#10B98115' : '#F59E0B15' }]}>
+                <Text style={{ fontSize: 12, fontWeight: '700', color: (camera.dynamic_available_quantity ?? camera.available_quantity ?? 1) > 0 ? '#10B981' : '#F59E0B' }}>
+                  {(camera.dynamic_available_quantity ?? camera.available_quantity ?? 1) > 0 ? `● Sẵn sàng (${camera.dynamic_available_quantity ?? camera.available_quantity ?? 1} còn)` : '● Hết hàng'}
+                </Text>
+              </View>
+            )}
           </View>
 
           {/* Title & Brand */}
@@ -438,7 +472,7 @@ export default function ProductDetailsScreen() {
           <TouchableOpacity style={s.addBtn} onPress={handleAddToCart}>
             <Text style={s.addBtnText}>Thêm giỏ</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={s.buyBtn} onPress={() => { if (camera) addToCart(camera); router.push('/payment'); }}>
+          <TouchableOpacity style={s.buyBtn} onPress={handleBuyNow}>
             <Text style={s.buyBtnText}>Thuê ngay</Text>
           </TouchableOpacity>
         </View>

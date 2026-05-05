@@ -12,7 +12,7 @@ import { authApi, bookingApi } from '../services/api';
 
 const API_URL = Platform.OS === 'web'
   ? 'http://localhost:5000/api'
-  : 'http://192.168.0.158:5000/api';
+  : 'http://192.168.0.169:5000/api';
 
 const formatPrice = (price: number) => price.toLocaleString('vi-VN') + 'đ';
 

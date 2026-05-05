@@ -105,7 +105,18 @@ export default function CategoryScreen() {
   const renderCamera = ({ item }: { item: any }) => (
     <TouchableOpacity
       style={{ flexDirection: 'row', backgroundColor: colors.cardBackground, borderRadius: 16, marginBottom: 12, overflow: 'hidden', borderWidth: 1, borderColor: colors.separator, marginHorizontal: 20 }}
-      onPress={() => router.push(`/product/${item._id}`)}
+      onPress={() => {
+        if (!startDate) {
+          import('react-native').then(({ Alert }) => {
+            Alert.alert('Chưa chọn ngày thuê', 'Vui lòng quay lại Trang chủ để chọn khoảng thời gian thuê thiết bị trước khi xem chi tiết.', [
+              { text: 'Hủy', style: 'cancel' },
+              { text: 'Về Trang chủ', onPress: () => router.push('/(tabs)') }
+            ]);
+          });
+        } else {
+          router.push(`/product/${item._id}`);
+        }
+      }}
       activeOpacity={0.7}
     >
       {/* Thumbnail */}
@@ -134,11 +145,13 @@ export default function CategoryScreen() {
             <Text style={{ color: colors.accentPink, fontWeight: '700' }}>{formatPrice(item.price_per_day)}</Text>
             <Text style={{ color: colors.textMuted, fontSize: 10, marginLeft: 4 }}>/ngày</Text>
           </View>
-          <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: 999, backgroundColor: (item.available_quantity ?? 1) > 0 ? 'rgba(16,185,129,0.2)' : 'rgba(245,158,11,0.2)' }}>
-            <Text style={{ fontSize: 10, fontWeight: '600', color: (item.available_quantity ?? 1) > 0 ? '#10B981' : '#F59E0B' }}>
-              {(item.available_quantity ?? 1) > 0 ? `Còn ${item.available_quantity ?? 1}` : 'Hết hàng'}
-            </Text>
-          </View>
+          {startDate && (
+            <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: 999, backgroundColor: (item.dynamic_available_quantity ?? item.available_quantity ?? 1) > 0 ? 'rgba(16,185,129,0.2)' : 'rgba(245,158,11,0.2)' }}>
+              <Text style={{ fontSize: 10, fontWeight: '600', color: (item.dynamic_available_quantity ?? item.available_quantity ?? 1) > 0 ? '#10B981' : '#F59E0B' }}>
+                {(item.dynamic_available_quantity ?? item.available_quantity ?? 1) > 0 ? `Còn ${item.dynamic_available_quantity ?? item.available_quantity ?? 1}` : 'Hết hàng'}
+              </Text>
+            </View>
+          )}
         </View>
       </View>
     </TouchableOpacity>

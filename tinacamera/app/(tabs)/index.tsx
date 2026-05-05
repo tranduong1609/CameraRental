@@ -303,7 +303,13 @@ export default function HomeScreen() {
                 <TouchableOpacity
                   key={`feat-${String(cam._id)}`}
                   style={{ width: '48%', backgroundColor: colors.cardBackground, borderRadius: 16, marginBottom: 16, overflow: 'hidden', borderWidth: 1, borderColor: colors.separator }}
-                  onPress={() => router.push(`/product/${cam._id}`)}
+                  onPress={() => {
+                    if (!startDate) {
+                      openCalendar();
+                    } else {
+                      router.push(`/product/${cam._id}`);
+                    }
+                  }}
                 >
                   {cam.images && cam.images.length > 0 ? (
                     <View style={{ height: 128, width: '100%', backgroundColor: colors.surfaceContainerHigh }}>

@@ -91,9 +91,9 @@ export default function HomePage() {
             )}
           </div>
 
-          <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
+          <div className="date-picker-group">
             {/* Start Date */}
-            <div style={{ flex: 1, minWidth: 160 }}>
+            <div className="date-picker-input-wrapper">
               <label style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Từ ngày</label>
               <input
                 type="date"
@@ -109,10 +109,10 @@ export default function HomePage() {
             </div>
 
             {/* Arrow */}
-            <div style={{ color: 'var(--accent)', fontWeight: 700, fontSize: 20, paddingTop: 20 }}>→</div>
+            <div className="date-picker-arrow">→</div>
 
             {/* End Date */}
-            <div style={{ flex: 1, minWidth: 160 }}>
+            <div className="date-picker-input-wrapper">
               <label style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Đến ngày</label>
               <input
                 type="date"
@@ -129,10 +129,10 @@ export default function HomePage() {
 
             {/* Days badge */}
             {totalDays > 0 && (
-              <div style={{
+              <div className="date-picker-days-badge" style={{
                 background: 'var(--accent-dim)', borderRadius: 'var(--radius-sm)',
                 padding: '10px 16px', fontWeight: 700, color: 'var(--accent)',
-                fontSize: 15, whiteSpace: 'nowrap', paddingTop: 30,
+                fontSize: 15, whiteSpace: 'nowrap',
               }}>
                 {totalDays} ngày
               </div>
@@ -143,7 +143,6 @@ export default function HomePage() {
               className="btn btn-primary"
               onClick={handleConfirmDates}
               disabled={!startDate || !endDate}
-              style={{ paddingTop: 30, alignSelf: 'flex-end' }}
             >
               <Search size={18} /> Tìm thiết bị trống
             </button>
@@ -224,7 +223,19 @@ export default function HomePage() {
           ) : (
             <div className="grid-products">
               {featured.map((cam, i) => (
-                <Link to={`/product/${cam._id}${startDate && endDate ? `?start_date=${startDate}&end_date=${endDate}` : ''}`} key={cam._id} className="card product-card animate-fade-in-up" style={{ animationDelay: `${i * 0.08}s` }}>
+                <div 
+                  key={cam._id} 
+                  className="card product-card animate-fade-in-up" 
+                  style={{ animationDelay: `${i * 0.08}s`, cursor: 'pointer' }}
+                  onClick={(e) => {
+                    if (!startDate || !endDate) {
+                      e.preventDefault();
+                      alert('Vui lòng chọn khoảng ngày thuê ở phía trên để xem chi tiết thiết bị.');
+                    } else {
+                      navigate(`/product/${cam._id}?start_date=${startDate}&end_date=${endDate}`);
+                    }
+                  }}
+                >
                   <div className="card-image-wrapper">
                     {cam.images?.[0] ? (
                       <img src={cam.images[0]} alt={cam.name} className="card-image" loading="lazy" />
@@ -232,9 +243,11 @@ export default function HomePage() {
                       <div className="card-image" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: 40 }}>📷</div>
                     )}
                     <div className="product-status">
-                      <span className={`badge ${(cam.available_quantity ?? 1) > 0 ? 'badge-success' : 'badge-warning'}`}>
-                        {(cam.available_quantity ?? 1) > 0 ? `Còn ${cam.available_quantity ?? 1}` : 'Hết'}
-                      </span>
+                      {startDate && endDate && (
+                        <span className={`badge ${(cam.dynamic_available_quantity ?? cam.available_quantity ?? 1) > 0 ? 'badge-success' : 'badge-warning'}`}>
+                          {(cam.dynamic_available_quantity ?? cam.available_quantity ?? 1) > 0 ? `Còn ${cam.dynamic_available_quantity ?? cam.available_quantity ?? 1}` : 'Hết'}
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div className="card-body">
@@ -258,7 +271,7 @@ export default function HomePage() {
                       </div>
                     )}
                   </div>
-                </Link>
+                </div>
               ))}
             </div>
           )}

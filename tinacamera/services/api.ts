@@ -8,7 +8,7 @@ const getBaseUrl = () => {
     return 'http://localhost:5000/api';
   }
   // Android/iOS (điện thoại thật hoặc emulator)
-  return 'http://192.168.1.14:5000/api';
+  return 'http://192.168.0.169:5000/api';
 };
 
 const BASE_URL = getBaseUrl();
@@ -165,8 +165,13 @@ export const cameraApi = {
   },
 
   // Lấy chi tiết 1 sản phẩm
-  getCameraDetail: (id: string) =>
-    request<{ camera: any; reviews: any[] }>(`/cameras/${id}`),
+  getCameraDetail: (id: string, startDate?: string, endDate?: string) => {
+    let url = `/cameras/${id}`;
+    if (startDate && endDate) {
+      url += `?start_date=${startDate}&end_date=${endDate}`;
+    }
+    return request<{ camera: any; reviews: any[] }>(url);
+  },
 
   // ============================================
   // QUẢN LÝ DÀNH CHO ADMIN

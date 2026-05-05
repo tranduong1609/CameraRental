@@ -29,7 +29,10 @@ export default function ProductDetailPage() {
   useEffect(() => {
     if (id) {
       setLoading(true);
-      cameraApi.getCameraDetail(id).then(res => {
+      const params = new URLSearchParams(window.location.search);
+      const sd = params.get('start_date');
+      const ed = params.get('end_date');
+      cameraApi.getCameraDetail(id, sd || undefined, ed || undefined).then(res => {
         if (res.ok && res.data) { setCamera(res.data.camera); setReviews(res.data.reviews || []); }
         setLoading(false);
       });
@@ -38,6 +41,19 @@ export default function ProductDetailPage() {
 
   const handleAddToCart = () => {
     if (!camera) return;
+    const params = new URLSearchParams(window.location.search);
+    const sd = params.get('start_date');
+    const ed = params.get('end_date');
+    if (!sd || !ed) {
+      alert('Vui lòng quay lại Trang chủ để chọn khoảng ngày thuê trước khi thêm vào giỏ hàng.');
+      navigate('/');
+      return;
+    }
+    const availQty = camera.dynamic_available_quantity ?? camera.available_quantity ?? 1;
+    if (availQty <= 0) {
+      alert('Thiết bị này đã được đặt hết trong khoảng thời gian bạn chọn.');
+      return;
+    }
     addToCart(camera);
     setToast('Đã thêm vào giỏ hàng!');
     setTimeout(() => setToast(''), 2500);
@@ -45,12 +61,21 @@ export default function ProductDetailPage() {
 
   const handleRentNow = () => {
     if (!camera) return;
-    addToCart(camera);
-    // Pass dates from URL if available
     const params = new URLSearchParams(window.location.search);
     const sd = params.get('start_date');
     const ed = params.get('end_date');
-    navigate(sd && ed ? `/cart?start_date=${sd}&end_date=${ed}` : '/cart');
+    if (!sd || !ed) {
+      alert('Vui lòng quay lại Trang chủ để chọn khoảng ngày thuê trước khi tiến hành thuê.');
+      navigate('/');
+      return;
+    }
+    const availQty = camera.dynamic_available_quantity ?? camera.available_quantity ?? 1;
+    if (availQty <= 0) {
+      alert('Thiết bị này đã được đặt hết trong khoảng thời gian bạn chọn.');
+      return;
+    }
+    addToCart(camera);
+    navigate(`/cart?start_date=${sd}&end_date=${ed}`);
   };
 
   const timeAgo = (d: string) => {
@@ -121,9 +146,11 @@ export default function ProductDetailPage() {
         <div>
           <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
             <span className="badge badge-primary">{CATEGORY_LABELS[camera.category] || camera.category}</span>
-            <span className={`badge ${(camera.available_quantity ?? 1) > 0 ? 'badge-success' : 'badge-warning'}`}>
-              {(camera.available_quantity ?? 1) > 0 ? `● Sẵn sàng (${camera.available_quantity ?? 1} còn)` : '● Hết hàng'}
-            </span>
+            {new URLSearchParams(window.location.search).get('start_date') && (
+              <span className={`badge ${(camera.dynamic_available_quantity ?? camera.available_quantity ?? 1) > 0 ? 'badge-success' : 'badge-warning'}`}>
+                {(camera.dynamic_available_quantity ?? camera.available_quantity ?? 1) > 0 ? `● Sẵn sàng (${camera.dynamic_available_quantity ?? camera.available_quantity ?? 1} còn)` : '● Hết hàng'}
+              </span>
+            )}
           </div>
 
           <div style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--text-muted)', marginBottom: 4 }}>{camera.brand}</div>
