@@ -6,7 +6,31 @@ const cors = require('cors');
 const app = express();
 
 // Middleware
-app.use(cors());
+// Cấu hình CORS
+const allowedOrigins = [
+    'https://camera-rental-alpha.vercel.app',
+    'http://localhost:5173',
+    'http://localhost:3000'
+];
+
+if (process.env.FRONTEND_URL) {
+    const envOrigins = process.env.FRONTEND_URL.split(',').map(o => o.trim());
+    envOrigins.forEach(o => {
+        if (o && !allowedOrigins.includes(o)) allowedOrigins.push(o);
+    });
+}
+
+app.use(cors({
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true
+}));
+
 app.use(express.json());
 
 // Global Request Logger
