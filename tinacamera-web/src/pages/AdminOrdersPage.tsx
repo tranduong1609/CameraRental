@@ -157,7 +157,7 @@ export default function AdminOrdersPage() {
               <div style={{ fontSize: 20, fontWeight: 800 }}>#{sb.booking_code}</div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 20, background: si.bg, color: si.color, fontWeight: 700, fontSize: 13 }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 20, background: si.bg, color: si.color, fontWeight: 700, fontSize: 13, whiteSpace: 'nowrap', flexShrink: 0 }}>
                 <StatusIcon size={14} />
                 {si.label}
               </span>
@@ -370,7 +370,7 @@ export default function AdminOrdersPage() {
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
                     <span style={{ fontWeight: 800, fontSize: 15 }}>#{booking.booking_code}</span>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 10px', borderRadius: 20, background: si.bg, color: si.color, fontWeight: 700, fontSize: 12 }}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 10px', borderRadius: 20, background: si.bg, color: si.color, fontWeight: 700, fontSize: 12, whiteSpace: 'nowrap', flexShrink: 0 }}>
                       <StatusIcon size={11} />{si.label}
                     </span>
                   </div>
