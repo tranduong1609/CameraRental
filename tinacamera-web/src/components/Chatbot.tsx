@@ -28,7 +28,7 @@ export default function Chatbot() {
     if (res.ok && res.data?.reply) {
       setMessages(prev => [...prev, { role: 'bot', text: res.data!.reply }]);
     } else {
-      setMessages(prev => [...prev, { role: 'bot', text: 'Xin lỗi, tôi gặp sự cố. Vui lòng thử lại sau.' }]);
+      setMessages(prev => [...prev, { role: 'bot', text: res.message || 'Xin lỗi, tôi gặp sự cố. Vui lòng thử lại sau.' }]);
     }
     setLoading(false);
   };

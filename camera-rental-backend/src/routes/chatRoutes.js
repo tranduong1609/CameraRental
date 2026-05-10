@@ -86,7 +86,7 @@ router.post('/', async (req, res) => {
     }
 
     // Lấy dữ liệu sản phẩm làm ngữ cảnh
-    const productList = await getProductContext();
+    const productList = await getProductContext(message);
 
     const systemPrompt = `Bạn là TinaBot – trợ lý tư vấn của TinaCamera, dịch vụ cho thuê máy ảnh.
 
@@ -103,7 +103,7 @@ ${productList || 'Chưa có sản phẩm.'}
 DỊCH VỤ: Hotline 0888888888 (8h-22h), đặt cọc hoàn trả, phụ kiện miễn phí, giao nhận tận nơi.`;
 
     const model = genAI.getGenerativeModel({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-1.5-flash',
       systemInstruction: systemPrompt,
       generationConfig: {
         maxOutputTokens: 1000,
