@@ -24,9 +24,9 @@ export default function RegisterPage() {
 
   return (
     <div className="auth-page">
-      <div style={{ position: 'absolute', top: '-5%', right: '-10%', width: 320, height: 320, borderRadius: '50%', background: 'var(--accent)', opacity: 0.04 }} />
+      <div style={{ position: 'absolute', top: '-5%', right: '-10%', width: 320, height: 320, borderRadius: '50%', background: 'var(--accent)', opacity: 0.04, pointerEvents: 'none' }} />
 
-      <div className="auth-card">
+      <div className="auth-card" style={{ position: 'relative', zIndex: 1 }}>
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
           <div style={{ width: 56, height: 56, borderRadius: 16, background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--on-primary)' }}>
             <Camera size={28} />
