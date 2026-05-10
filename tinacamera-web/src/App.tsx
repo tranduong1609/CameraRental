@@ -22,6 +22,7 @@ import SuperAdminLayout from './components/SuperAdminLayout';
 import SuperAdminDashboardPage from './pages/SuperAdminDashboardPage';
 import SuperAdminUsersPage from './pages/SuperAdminUsersPage';
 import SuperAdminSettingsPage from './pages/SuperAdminSettingsPage';
+import ScrollToTop from './components/ScrollToTop';
 
 function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -41,6 +42,7 @@ function AuthLayout({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <AuthProvider>
         <CartProvider>
           <Routes>

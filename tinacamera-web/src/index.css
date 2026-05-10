@@ -875,6 +875,7 @@ select {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 48px;
+  margin-top: 32px;
 }
 
 @media (max-width: 900px) {
@@ -997,9 +998,20 @@ select {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px;
+  padding: 20px;
   position: relative;
   overflow: hidden;
+  /* Đảm bảo căn giữa tuyệt đối */
+  background: var(--bg);
+}
+
+@media (max-width: 768px) {
+  .auth-page {
+    /* Né thanh status bar trên mobile để form nằm giữa vùng nhìn thấy */
+    padding-top: env(safe-area-inset-top, 40px);
+    align-items: flex-start; /* Trên mobile đẩy lên một chút để tránh bàn phím che */
+    padding-top: 15vh; 
+  }
 }
 
 .auth-card {
