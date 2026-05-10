@@ -73,6 +73,8 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   transition: background-color 0.3s ease, color 0.3s ease;
+  /* Đảm bảo nội dung không bị thanh gạt Home che khuất */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 a {
@@ -228,6 +230,8 @@ select {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   transition: all 0.3s ease;
+  /* Thêm padding để né tai thỏ (Notch) */
+  padding-top: env(safe-area-inset-top, 0px);
 }
 
 .navbar-inner {
@@ -779,7 +783,7 @@ select {
 .footer {
   background: var(--surface);
   border-top: 1px solid var(--separator);
-  padding: 48px 0 24px;
+  padding: 48px 0 calc(24px + env(safe-area-inset-bottom, 0px));
 }
 
 .footer-grid {
@@ -1082,7 +1086,8 @@ select {
 /* ── Chatbot ── */
 .chatbot-toggle {
   position: fixed;
-  bottom: 24px;
+  /* Đẩy nút lên khỏi thanh Home Indicator của iPhone */
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
   right: 24px;
   z-index: 150;
   width: 56px;

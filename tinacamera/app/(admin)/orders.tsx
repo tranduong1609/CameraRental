@@ -175,8 +175,8 @@ export default function AdminOrders() {
     }
   };
 
-  // ── Xác nhận nhận máy (kèm CCCD) ──
-  const handlePickup = async (bookingId: string) => {
+  // ── Xử lý API giao máy ──
+  const proceedPickup = async (bookingId: string) => {
     if (!token) return;
     setUpdating(true);
     try {
@@ -194,6 +194,32 @@ export default function AdminOrders() {
     } finally {
       setUpdating(false);
     }
+  };
+
+  // ── Xác nhận nhận máy (kèm CCCD) ──
+  const handlePickup = async (bookingId: string) => {
+    if (!token) return;
+
+    if (selectedBooking && cccdInfo) {
+      const bookingName = selectedBooking.user_id?.full_name || selectedBooking.customer_info?.full_name || '';
+      const cccdName = cccdInfo.full_name || '';
+
+      const normalizeStr = (str: string) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+
+      if (bookingName && cccdName && normalizeStr(bookingName) !== normalizeStr(cccdName)) {
+        Alert.alert(
+          '⚠️ Cảnh báo: Tên không khớp',
+          `Tên trên đơn hàng: ${bookingName}\nTên trên CCCD: ${cccdName}\n\nBạn có chắc chắn muốn giao máy cho người này không?`,
+          [
+            { text: 'Hủy', style: 'cancel' },
+            { text: 'Tiếp tục giao', onPress: () => proceedPickup(bookingId), style: 'destructive' }
+          ]
+        );
+        return;
+      }
+    }
+
+    proceedPickup(bookingId);
   };
 
   // ── Xác nhận trả máy ──

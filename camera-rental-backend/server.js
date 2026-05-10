@@ -22,14 +22,8 @@ if (process.env.FRONTEND_URL) {
 
 app.use(cors({
     origin: (origin, callback) => {
-        // Cho phép request không có origin (Mobile app)
-        // Hoặc origin nằm trong whitelist
-        // Hoặc origin là subdomain của vercel.app
-        if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
+        // Cho phép tất cả các nguồn truy cập để test
+        callback(null, true);
     },
     credentials: true
 }));
