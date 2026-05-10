@@ -571,9 +571,15 @@ select {
     display: none;
   }
 
+  .date-picker-group {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
   .date-picker-input-wrapper {
-    min-width: 100%;
-    flex: 100%;
+    width: 100%;
+    min-width: 0;
   }
 
   .date-picker-input-wrapper input {
@@ -586,18 +592,15 @@ select {
   .date-picker-group>button {
     width: 100%;
     justify-content: center;
-    padding: 10px 16px;
+    padding: 12px 16px;
+    margin-top: 4px;
   }
 
   .date-picker-group>.date-picker-days-badge {
     width: 100%;
     text-align: center;
     justify-content: center;
-    margin-bottom: 8px;
-  }
-
-  .date-picker-group {
-    gap: 10px;
+    margin-bottom: 4px;
   }
 }
 
@@ -685,7 +688,7 @@ select {
 
   .hero {
     padding-top: 32px;
-    padding-bottom: 28px;
+    padding-bottom: 56px;
   }
 }
 
