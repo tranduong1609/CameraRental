@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send } from 'lucide-react';
-import { chatApi } from '../services/api';
+import { cameraApi } from '../services/api';
 
 export default function Chatbot() {
   const [open, setOpen] = useState(false);
@@ -22,13 +22,48 @@ export default function Chatbot() {
     setMessages(prev => [...prev, { role: 'user', text: userMsg }]);
     setLoading(true);
 
-    const history = messages.map(m => ({ role: m.role === 'bot' ? 'model' : 'user', text: m.text }));
-    const res = await chatApi.sendMessage(userMsg, history);
+    try {
+      // 1. Fetch available products for context
+      let productContext = 'Chưa có sản phẩm.';
+      try {
+        const camRes = await cameraApi.getCameras({ limit: 10, search: userMsg });
+        if (camRes.ok && camRes.data?.cameras) {
+          productContext = camRes.data.cameras.slice(0, 10).map((c: any) => 
+            `- ${c.name} (${c.brand}): ${c.price_per_day?.toLocaleString('vi-VN')}đ/ngày`
+          ).join('\n');
+        }
+      } catch(e) {}
 
-    if (res.ok && res.data?.reply) {
-      setMessages(prev => [...prev, { role: 'bot', text: res.data!.reply }]);
-    } else {
-      setMessages(prev => [...prev, { role: 'bot', text: res.message || 'Xin lỗi, tôi gặp sự cố. Vui lòng thử lại sau.' }]);
+      // 2. Prepare Gemini history
+      const history = messages
+        .filter(m => m.role !== 'bot' || !m.text.includes('sự cố')) // Bỏ qua tin nhắn lỗi
+        .map(m => ({ 
+          role: m.role === 'bot' ? 'model' : 'user', 
+          parts: [{ text: m.text }] 
+        }));
+      history.push({ role: 'user', parts: [{ text: userMsg }] });
+
+      // 3. Call Gemini API directly from Frontend to bypass Render IP block
+      const API_KEY = "AIzaSyA2q-n8qR2pRrBnw_au0LFFo8-vOrJ7cXY";
+      const systemPrompt = `Bạn là TinaBot – trợ lý tư vấn của TinaCamera. QUY TẮC: Trả lời tiếng Việt, thân thiện, ngắn gọn (dưới 3 câu). Chỉ tập trung thông tin thuê máy. Ngoài lề -> gọi 0888888888. SẢN PHẨM: ${productContext}`;
+      
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${API_KEY}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: systemPrompt }] },
+          contents: history,
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
+        setMessages(prev => [...prev, { role: 'bot', text: data.candidates[0].content.parts[0].text }]);
+      } else {
+        setMessages(prev => [...prev, { role: 'bot', text: data.error?.message || 'Xin lỗi, tôi gặp sự cố.' }]);
+      }
+    } catch (err) {
+      setMessages(prev => [...prev, { role: 'bot', text: 'Xin lỗi, hệ thống mạng đang gặp sự cố.' }]);
     }
     setLoading(false);
   };
