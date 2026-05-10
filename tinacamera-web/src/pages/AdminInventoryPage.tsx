@@ -200,8 +200,17 @@ export default function AdminInventoryPage() {
 
       {/* Add/Edit Modal (Portal) */}
       {showModal && createPortal(
-        <div className="modal-overlay" onClick={() => setShowModal(false)} style={{ zIndex: 9999 }}>
-          <div className="modal-content animate-scale-in" onClick={e => e.stopPropagation()} style={{ maxWidth: 600, padding: 0, display: 'flex', flexDirection: 'column', maxHeight: '90vh', overflow: 'hidden' }}>
+        <div className="modal-overlay" onClick={() => setShowModal(false)} style={{ zIndex: 9999, alignItems: 'flex-start', padding: '16px', overflowY: 'auto' }}>
+          <div className="modal-content animate-scale-in" onClick={e => e.stopPropagation()} style={{ 
+            width: '100%', 
+            maxWidth: 600, 
+            margin: 'auto', // Centers vertically if there's space, otherwise sticks to top padding
+            padding: 0, 
+            display: 'flex', 
+            flexDirection: 'column', 
+            maxHeight: 'calc(100dvh - 32px)', 
+            overflow: 'hidden' 
+          }}>
             {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
               <h2 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>{editingId ? 'Sửa thiết bị' : 'Thêm thiết bị mới'}</h2>
@@ -210,7 +219,7 @@ export default function AdminInventoryPage() {
 
             {/* Scrollable Body */}
             <div style={{ padding: '24px', overflowY: 'auto', flex: 1 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 16 }}>
                 <div>
                   <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8, display: 'block' }}>TÊN THIẾT BỊ</label>
                   <input type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} style={{ width: '100%', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text)' }} />
