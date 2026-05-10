@@ -103,7 +103,7 @@ ${productList || 'Chưa có sản phẩm.'}
 DỊCH VỤ: Hotline 0888888888 (8h-22h), đặt cọc hoàn trả, phụ kiện miễn phí, giao nhận tận nơi.`;
 
     const model = genAI.getGenerativeModel({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-3.1-flash-lite',
       systemInstruction: systemPrompt,
       generationConfig: {
         maxOutputTokens: 1000,
@@ -136,7 +136,7 @@ DỊCH VỤ: Hotline 0888888888 (8h-22h), đặt cọc hoàn trả, phụ kiện
     }
 
     res.status(500).json({
-      message: 'Xin lỗi, hệ thống chatbot đang gặp sự cố. Vui lòng thử lại sau hoặc gọi hotline 0888888888.',
+      message: 'Xin lỗi, hệ thống chatbot đang gặp sự cố. Vui lòng thử lại sau hoặc gọi hotline 0899259410.',
     });
   }
 });
