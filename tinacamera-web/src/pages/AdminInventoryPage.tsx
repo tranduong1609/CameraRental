@@ -161,7 +161,7 @@ export default function AdminInventoryPage() {
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span style={{ color: 'var(--primary)', fontWeight: 700, fontSize: 14 }}>{formatCurrency(camera.price_per_day)}/ngày</span>
-                    <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>SL: {camera.available_quantity}/{camera.total_quantity}</span>
+                    <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>SL: {camera.available_quantity}{camera.total_quantity}</span>
                   </div>
                 </div>
               </div>
