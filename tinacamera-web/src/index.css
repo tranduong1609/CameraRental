@@ -533,6 +533,16 @@ select {
 }
 
 /* ── Date Picker ── */
+.date-picker-container {
+  margin-top: -28px;
+}
+
+@media (max-width: 640px) {
+  .date-picker-container {
+    margin-top: 16px;
+  }
+}
+
 .date-picker-card {
   background: var(--card-bg);
   border-radius: var(--radius);

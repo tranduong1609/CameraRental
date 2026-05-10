@@ -76,7 +76,7 @@ export default function HomePage() {
       </section>
 
       {/* ── Date Picker Section ── */}
-      <div className="container" style={{ marginTop: -28, position: 'relative', zIndex: 2 }}>
+      <div className="container date-picker-container" style={{ position: 'relative', zIndex: 2 }}>
         <div className="date-picker-card animate-fade-in">
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16, gap: 8 }}>
             <Calendar size={18} style={{ color: 'var(--accent)' }} />
@@ -100,7 +100,7 @@ export default function HomePage() {
                 style={{
                   width: '100%', padding: '12px 16px', borderRadius: 'var(--radius-sm)',
                   border: '1px solid var(--input-border)', background: 'var(--input-bg)',
-                  color: 'var(--text)', fontSize: 15, fontWeight: 600,
+                  color: 'var(--text)', fontSize: 15, fontWeight: 600, boxSizing: 'border-box'
                 }}
               />
             </div>
@@ -119,7 +119,7 @@ export default function HomePage() {
                 style={{
                   width: '100%', padding: '12px 16px', borderRadius: 'var(--radius-sm)',
                   border: '1px solid var(--input-border)', background: 'var(--input-bg)',
-                  color: 'var(--text)', fontSize: 15, fontWeight: 600,
+                  color: 'var(--text)', fontSize: 15, fontWeight: 600, boxSizing: 'border-box'
                 }}
               />
             </div>
