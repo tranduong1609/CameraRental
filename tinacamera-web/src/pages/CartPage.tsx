@@ -160,7 +160,7 @@ export default function CartPage() {
         <h1 className="section-title" style={{ margin: 0 }}>Giỏ hàng ({items.length})</h1>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: 32 }}>
+      <div className="cart-grid">
         {/* Items */}
         <div>
           {items.map(item => (
@@ -183,13 +183,13 @@ export default function CartPage() {
           <h3 style={{ fontWeight: 700, fontSize: 18, marginBottom: 20 }}>Thông tin thuê</h3>
 
           <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: 1, display: 'block', marginBottom: 8 }}>NGÀY BẮT ĐẦU</label>
-          <input type="date" min={today} value={startDate} onChange={e => setStartDate(e.target.value)} style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text)', fontSize: 14, marginBottom: 16 }} />
+          <input type="date" min={today} value={startDate} onChange={e => setStartDate(e.target.value)} style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text)', fontSize: 14, marginBottom: 16, boxSizing: 'border-box' }} />
 
           <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: 1, display: 'block', marginBottom: 8 }}>NGÀY KẾT THÚC</label>
-          <input type="date" min={startDate || today} value={endDate} onChange={e => setEndDate(e.target.value)} style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text)', fontSize: 14, marginBottom: 16 }} />
+          <input type="date" min={startDate || today} value={endDate} onChange={e => setEndDate(e.target.value)} style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text)', fontSize: 14, marginBottom: 16, boxSizing: 'border-box' }} />
 
           <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: 1, display: 'block', marginBottom: 8 }}>GHI CHÚ</label>
-          <textarea value={note} onChange={e => setNote(e.target.value)} placeholder="Ghi chú cho cửa hàng..." rows={3} style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text)', fontSize: 14, marginBottom: 20, resize: 'none' }} />
+          <textarea value={note} onChange={e => setNote(e.target.value)} placeholder="Ghi chú cho cửa hàng..." rows={3} style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text)', fontSize: 14, marginBottom: 20, resize: 'none', boxSizing: 'border-box' }} />
 
           <div style={{ borderTop: '1px solid var(--separator)', paddingTop: 16 }}>
             {days > 0 && (

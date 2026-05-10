@@ -82,6 +82,12 @@ a {
   text-decoration: none;
 }
 
+input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  max-width: 100%;
+}
+
 button {
   cursor: pointer;
   border: none;
@@ -1383,6 +1389,20 @@ select {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* ── Cart ── */
+.cart-grid {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 32px;
+}
+
+@media (max-width: 900px) {
+  .cart-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
 }
 
 /* ── Empty State ── */
