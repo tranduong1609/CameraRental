@@ -118,7 +118,7 @@ export default function SuperAdminUsersPage() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 16 }}>
         <h1 style={{ fontSize: 24, fontWeight: 800, margin: 0 }}>Quản lý tài khoản</h1>
         {stats && (
-          <div style={{ display: 'flex', gap: 16, fontSize: 13, color: 'var(--text-muted)', fontWeight: 600 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 16px', fontSize: 13, color: 'var(--text-muted)', fontWeight: 600 }}>
             <span>Tổng: <strong style={{ color: 'var(--text)' }}>{stats.total}</strong></span>
             <span>Admin: <strong style={{ color: '#10b981' }}>{stats.admins}</strong></span>
             <span>Cửa hàng: <strong style={{ color: '#f59e0b' }}>{stats.storeOwners}</strong></span>

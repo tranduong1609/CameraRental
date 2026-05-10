@@ -1534,7 +1534,9 @@ select {
   
   .admin-sidebar, .admin-sidebar-super {
     width: 100%;
-    position: relative;
+    position: sticky;
+    top: 0;
+    z-index: 100;
     height: auto;
     border-right: none !important;
     border-bottom: 1px solid var(--separator);

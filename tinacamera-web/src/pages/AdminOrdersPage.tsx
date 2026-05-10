@@ -134,7 +134,8 @@ export default function AdminOrdersPage() {
         style={{
           position: 'fixed', inset: 0, zIndex: 9999,
           background: 'rgba(0,0,0,0.55)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
+          padding: '16px', overflowY: 'auto',
           backdropFilter: 'blur(4px)',
           animation: 'fadeIn 0.2s ease',
         }}
@@ -143,15 +144,17 @@ export default function AdminOrdersPage() {
           onClick={e => e.stopPropagation()}
           style={{
             background: 'var(--card-bg)',
-            borderRadius: 24, padding: 32,
-            width: '90%', maxWidth: 580,
-            maxHeight: '90vh', overflowY: 'auto',
+            borderRadius: 24, 
+            width: '100%', maxWidth: 580,
+            margin: 'auto',
+            display: 'flex', flexDirection: 'column',
+            maxHeight: 'calc(100dvh - 32px)', overflow: 'hidden',
             boxShadow: '0 24px 64px rgba(0,0,0,0.25)',
             animation: 'scaleIn 0.25s ease',
           }}
         >
           {/* Header */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, paddingBottom: 16, borderBottom: '1px solid var(--separator)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '24px 24px 16px', borderBottom: '1px solid var(--separator)', flexShrink: 0 }}>
             <div>
               <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 4 }}>Mã đơn</div>
               <div style={{ fontSize: 20, fontWeight: 800 }}>#{sb.booking_code}</div>
@@ -167,7 +170,9 @@ export default function AdminOrdersPage() {
             </div>
           </div>
 
-          {/* Info Grid */}
+          {/* Scrollable Body */}
+          <div style={{ padding: '24px', overflowY: 'auto', flex: 1 }}>
+            {/* Info Grid */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
             <InfoRow label="Khách hàng" value={customerName} sub={sb.user_id?.phone || sb.customer_info?.phone} />
             <InfoRow label="Thiết bị" value={sb.camera_id?.name || sb.camera_snapshot?.name || '—'} />
@@ -278,6 +283,7 @@ export default function AdminOrdersPage() {
                 <option value="completed">Hoàn tất</option>
                 <option value="cancelled">Đã hủy</option>
               </select>
+            </div>
             </div>
           </div>
         </div>
