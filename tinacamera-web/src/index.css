@@ -220,6 +220,12 @@ select {
   padding: 0 24px;
 }
 
+@media (max-width: 768px) {
+  .container {
+    padding: 0 16px;
+  }
+}
+
 /* ── Navbar ── */
 .navbar {
   position: sticky;
@@ -230,18 +236,17 @@ select {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   transition: all 0.3s ease;
-  /* Ép khoảng trống phía trên tối thiểu 20px nếu safe-area không chạy */
-  padding-top: max(20px, env(safe-area-inset-top, 0px));
+  padding-top: env(safe-area-inset-top, 0px);
 }
 
 .navbar-inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 64px; /* Giảm nhẹ chiều cao để trông thanh thoát hơn */
+  height: 56px;
   max-width: 1280px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 16px;
 }
 
 .navbar-brand {
@@ -295,7 +300,36 @@ select {
 .navbar-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
+}
+
+@media (max-width: 768px) {
+  .navbar-actions {
+    gap: 6px;
+  }
+  .navbar-brand {
+    font-size: 18px;
+    gap: 8px;
+  }
+  .navbar-brand-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+  }
+  .btn-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+  }
+  .theme-toggle {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+  }
+  .btn-sm {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
 }
 
 /* ── Buttons ── */
@@ -445,6 +479,14 @@ select {
   height: 52px;
 }
 
+@media (max-width: 768px) {
+  .input-group {
+    height: 44px;
+    border-radius: var(--radius-sm);
+    padding: 0 12px;
+  }
+}
+
 .input-group:focus-within {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-dim);
@@ -501,9 +543,15 @@ select {
     flex: 100%;
   }
 
+  .date-picker-input-wrapper input {
+    padding: 10px 12px !important;
+    font-size: 14px !important;
+  }
+
   .date-picker-group>button {
     width: 100%;
     justify-content: center;
+    padding: 10px 16px;
   }
 
   .date-picker-group>.date-picker-days-badge {
@@ -511,6 +559,10 @@ select {
     text-align: center;
     justify-content: center;
     margin-bottom: 8px;
+  }
+
+  .date-picker-group {
+    gap: 10px;
   }
 }
 
@@ -531,8 +583,7 @@ select {
 /* ── Hero ── */
 .hero {
   position: relative;
-  /* Tăng padding top để không bị Navbar đè lên Search bar trên mobile */
-  padding: 100px 0 60px;
+  padding: 60px 0 48px;
   overflow: hidden;
   background: linear-gradient(135deg, var(--bg), var(--surface));
 }
@@ -588,22 +639,28 @@ select {
 
 @media (max-width: 768px) {
   .hero h1 {
-    font-size: 32px;
+    font-size: 28px;
   }
 
   .hero p {
-    font-size: 16px;
+    font-size: 14px;
+    margin-bottom: 20px;
   }
 
   .hero {
-    /* Mobile cần khoảng cách lớn hơn để né Navbar sticky */
-    padding: 110px 0 40px;
+    padding: 32px 0 28px;
   }
 }
 
 /* ── Section ── */
 .section {
   padding: 60px 0;
+}
+
+@media (max-width: 768px) {
+  .section {
+    padding: 32px 0;
+  }
 }
 
 .section-header {
@@ -875,13 +932,17 @@ select {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 48px;
-  margin-top: 32px;
+  margin-top: 24px;
 }
 
 @media (max-width: 900px) {
   .product-detail-grid {
     grid-template-columns: 1fr;
-    gap: 24px;
+    gap: 16px;
+    margin-top: 12px;
+  }
+  .product-gallery img {
+    aspect-ratio: 4/3;
   }
 }
 
@@ -995,22 +1056,27 @@ select {
 /* ── Auth Pages ── */
 .auth-page {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
   position: relative;
   overflow: hidden;
-  /* Đảm bảo căn giữa tuyệt đối */
   background: var(--bg);
 }
 
 @media (max-width: 768px) {
   .auth-page {
-    /* Né thanh status bar trên mobile để form nằm giữa vùng nhìn thấy */
-    padding-top: env(safe-area-inset-top, 40px);
-    align-items: flex-start; /* Trên mobile đẩy lên một chút để tránh bàn phím che */
-    padding-top: 15vh; 
+    padding: 16px;
+    padding-top: max(20px, env(safe-area-inset-top, 0px));
+  }
+  .auth-card {
+    padding: 28px 20px;
+    border-radius: 20px;
+  }
+  .auth-card h1 {
+    font-size: 24px;
   }
 }
 
@@ -1431,5 +1497,49 @@ select {
     margin-left: 0;
     padding: 16px;
     padding-bottom: max(32px, env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* ── Order Cards ── */
+.order-card-inner {
+  display: flex;
+  gap: 16px;
+  padding: 20px;
+  align-items: center;
+}
+
+.order-card-img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 12px;
+  background: var(--surface-high);
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .order-card-inner {
+    gap: 12px;
+    padding: 14px;
+  }
+  .order-card-img {
+    width: 56px;
+    height: 56px;
+    border-radius: 10px;
+  }
+  .order-card .card-body,
+  .order-card div[style*="fontSize: 16"] {
+    font-size: 14px !important;
+  }
+  .section-title {
+    font-size: 20px;
+  }
+  .breadcrumb {
+    font-size: 12px;
+    margin-bottom: 12px;
+  }
+  /* Compact card hover effect on mobile */
+  .card:hover {
+    transform: none;
   }
 }

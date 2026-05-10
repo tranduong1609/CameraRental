@@ -191,12 +191,12 @@ export default function OrdersPage() {
           {bookings.map(b => {
             const status = STATUS_MAP[b.status] || { label: b.status, cls: 'badge-primary' };
             return (
-              <div key={b._id} className="card animate-slide-in" style={{ marginBottom: 12, cursor: 'default' }}>
-                <div style={{ display: 'flex', gap: 16, padding: 20, alignItems: 'center' }}>
+              <div key={b._id} className="card order-card animate-slide-in" style={{ marginBottom: 12, cursor: 'default' }}>
+                <div className="order-card-inner">
                   <img
                     src={b.camera_id?.images?.[0] || ''}
                     alt={b.camera_id?.name || ''}
-                    style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 12, background: 'var(--surface-high)' }}
+                    className="order-card-img"
                     onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                   />
                   <div style={{ flex: 1 }}>
