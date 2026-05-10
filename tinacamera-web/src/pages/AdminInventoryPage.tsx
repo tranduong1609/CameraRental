@@ -9,7 +9,7 @@ export default function AdminInventoryPage() {
   const [cameras, setCameras] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  
+
   // Modal states
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -66,7 +66,7 @@ export default function AdminInventoryPage() {
   const handleSave = async () => {
     if (!token) return;
     setSaving(true);
-    
+
     // Convert to proper types
     const submitData = {
       ...formData,
@@ -167,26 +167,26 @@ export default function AdminInventoryPage() {
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
-                <div style={{ 
-                  display: 'inline-flex', alignItems: 'center', gap: 6, 
-                  padding: '4px 12px', borderRadius: 20, 
-                  background: camera.available_quantity > 0 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)', 
+                <div style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  padding: '4px 12px', borderRadius: 20,
+                  background: camera.available_quantity > 0 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)',
                   color: camera.available_quantity > 0 ? '#10b981' : '#f59e0b',
                   fontSize: 12, fontWeight: 600
                 }}>
                   <div style={{ width: 6, height: 6, borderRadius: '50%', background: camera.available_quantity > 0 ? '#10b981' : '#f59e0b' }}></div>
                   {camera.available_quantity > 0 ? 'Sẵn sàng' : 'Đang cho thuê'}
                 </div>
-                
+
                 <div style={{ display: 'flex', gap: 8 }}>
-                  <button 
-                    style={{ width: 36, height: 36, borderRadius: 8, border: '1px solid var(--input-border)', background: 'transparent', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }} 
+                  <button
+                    style={{ width: 36, height: 36, borderRadius: 8, border: '1px solid var(--input-border)', background: 'transparent', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
                     onClick={() => handleOpenModal(camera)}
                   >
                     <Edit2 size={16} />
                   </button>
-                  <button 
-                    style={{ width: 36, height: 36, borderRadius: 8, border: '1px solid rgba(239, 68, 68, 0.3)', background: 'transparent', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }} 
+                  <button
+                    style={{ width: 36, height: 36, borderRadius: 8, border: '1px solid rgba(239, 68, 68, 0.3)', background: 'transparent', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
                     onClick={() => handleDelete(camera._id)}
                   >
                     <Trash2 size={16} />
@@ -201,82 +201,89 @@ export default function AdminInventoryPage() {
       {/* Add/Edit Modal (Portal) */}
       {showModal && createPortal(
         <div className="modal-overlay" onClick={() => setShowModal(false)} style={{ zIndex: 9999 }}>
-          <div className="modal-content animate-scale-in" onClick={e => e.stopPropagation()} style={{ maxWidth: 600 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-              <h2 style={{ fontSize: 20, fontWeight: 700 }}>{editingId ? 'Sửa thiết bị' : 'Thêm thiết bị mới'}</h2>
-              <button onClick={() => setShowModal(false)} style={{ background: 'none', color: 'var(--text-muted)', border: 'none', cursor: 'pointer' }}><X size={24} /></button>
+          <div className="modal-content animate-scale-in" onClick={e => e.stopPropagation()} style={{ maxWidth: 600, padding: 0, display: 'flex', flexDirection: 'column', maxHeight: '90vh', overflow: 'hidden' }}>
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
+              <h2 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>{editingId ? 'Sửa thiết bị' : 'Thêm thiết bị mới'}</h2>
+              <button onClick={() => setShowModal(false)} style={{ background: 'none', color: 'var(--text-muted)', border: 'none', cursor: 'pointer', display: 'flex' }}><X size={24} /></button>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
-              <div>
-                <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8, display: 'block' }}>TÊN THIẾT BỊ</label>
-                <input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} style={{ width: '100%', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text)' }} />
-              </div>
-              <div>
-                <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8, display: 'block' }}>DANH MỤC</label>
-                <select value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} style={{ width: '100%', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text)', outline: 'none' }}>
-                  <option value="mirrorless">Mirrorless</option>
-                  <option value="dslr">DSLR</option>
-                  <option value="film">Film</option>
-                  <option value="lens">Ống kính (Lens)</option>
-                  <option value="accessory">Phụ kiện</option>
-                </select>
-              </div>
-              <div>
-                <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8, display: 'block' }}>THƯƠNG HIỆU</label>
-                <input type="text" value={formData.brand} onChange={e => setFormData({...formData, brand: e.target.value})} style={{ width: '100%', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text)' }} />
-              </div>
-              <div>
-                <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8, display: 'block' }}>GIÁ CỌC (VNĐ)</label>
-                <input type="number" value={formData.deposit_amount} onChange={e => setFormData({...formData, deposit_amount: e.target.value})} style={{ width: '100%', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text)' }} />
-              </div>
-              <div>
-                <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8, display: 'block' }}>GIÁ THUÊ / NGÀY</label>
-                <input type="number" value={formData.price_per_day} onChange={e => setFormData({...formData, price_per_day: e.target.value})} style={{ width: '100%', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text)' }} />
-              </div>
-              <div>
-                <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8, display: 'block' }}>TỔNG SỐ LƯỢNG</label>
-                <input type="number" value={formData.total_quantity} onChange={e => setFormData({...formData, total_quantity: e.target.value})} style={{ width: '100%', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text)' }} />
-              </div>
-              <div>
-                <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8, display: 'block' }}>SẴN CÓ</label>
-                <input type="number" value={formData.available_quantity} onChange={e => setFormData({...formData, available_quantity: e.target.value})} style={{ width: '100%', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text)' }} />
-              </div>
-              <div style={{ gridColumn: '1 / -1' }}>
-                <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8, display: 'block' }}>PHỤ KIỆN ĐI KÈM (Cách nhau bằng dấu phẩy)</label>
-                <input type="text" placeholder="VD: Pin, Sạc, Thẻ nhớ 64GB, Túi đựng" value={formData.included_items} onChange={e => setFormData({...formData, included_items: e.target.value})} style={{ width: '100%', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text)' }} />
-              </div>
-              <div style={{ gridColumn: '1 / -1' }}>
-                <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8, display: 'block' }}>MÔ TẢ</label>
-                <textarea rows={3} value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} style={{ width: '100%', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text)', resize: 'none' }} />
-              </div>
-              <div style={{ gridColumn: '1 / -1' }}>
-                <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8, display: 'block' }}>HÌNH ẢNH ĐÃ CÓ</label>
-                {formData.existing_images && formData.existing_images.length > 0 && (
-                  <div style={{ display: 'flex', gap: 8, overflowX: 'auto', marginBottom: 12 }}>
-                    {formData.existing_images.map((img: string, idx: number) => (
-                      <div key={idx} style={{ position: 'relative', width: 64, height: 64, borderRadius: 8, overflow: 'hidden', border: '1px solid var(--input-border)' }}>
-                        <img src={img} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />
-                        <button 
-                          onClick={(e) => { 
-                            e.preventDefault();
-                            setFormData({...formData, existing_images: formData.existing_images.filter((_: any, i: number) => i !== idx)});
-                          }}
-                          style={{ position: 'absolute', top: 2, right: 2, background: 'rgba(0,0,0,0.6)', color: '#fff', border: 'none', borderRadius: '50%', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 12, padding: 0 }}
-                        >✕</button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                
-                <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8, display: 'block' }}>THÊM HÌNH ẢNH MỚI (Tùy chọn)</label>
-                <input type="file" multiple accept="image/*" onChange={e => setSelectedFiles(Array.from(e.target.files || []))} style={{ width: '100%', padding: '10px 14px', borderRadius: 8, border: '1px dashed var(--input-border)', color: 'var(--text-muted)' }} />
+            {/* Scrollable Body */}
+            <div style={{ padding: '24px', overflowY: 'auto', flex: 1 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8, display: 'block' }}>TÊN THIẾT BỊ</label>
+                  <input type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} style={{ width: '100%', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text)' }} />
+                </div>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8, display: 'block' }}>DANH MỤC</label>
+                  <select value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })} style={{ width: '100%', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text)', outline: 'none' }}>
+                    <option value="mirrorless">Mirrorless</option>
+                    <option value="dslr">DSLR</option>
+                    <option value="film">Film</option>
+                    <option value="lens">Ống kính (Lens)</option>
+                    <option value="accessory">Phụ kiện</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8, display: 'block' }}>THƯƠNG HIỆU</label>
+                  <input type="text" value={formData.brand} onChange={e => setFormData({ ...formData, brand: e.target.value })} style={{ width: '100%', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text)' }} />
+                </div>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8, display: 'block' }}>GIÁ CỌC (VNĐ)</label>
+                  <input type="number" value={formData.deposit_amount} onChange={e => setFormData({ ...formData, deposit_amount: e.target.value })} style={{ width: '100%', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text)' }} />
+                </div>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8, display: 'block' }}>GIÁ THUÊ / NGÀY</label>
+                  <input type="number" value={formData.price_per_day} onChange={e => setFormData({ ...formData, price_per_day: e.target.value })} style={{ width: '100%', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text)' }} />
+                </div>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8, display: 'block' }}>TỔNG SỐ LƯỢNG</label>
+                  <input type="number" value={formData.total_quantity} onChange={e => setFormData({ ...formData, total_quantity: e.target.value })} style={{ width: '100%', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text)' }} />
+                </div>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8, display: 'block' }}>SẴN CÓ</label>
+                  <input type="number" value={formData.available_quantity} onChange={e => setFormData({ ...formData, available_quantity: e.target.value })} style={{ width: '100%', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text)' }} />
+                </div>
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8, display: 'block' }}>PHỤ KIỆN ĐI KÈM (Cách nhau bằng dấu phẩy)</label>
+                  <input type="text" placeholder="VD: Pin, Sạc, Thẻ nhớ 64GB, Túi đựng" value={formData.included_items} onChange={e => setFormData({ ...formData, included_items: e.target.value })} style={{ width: '100%', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text)' }} />
+                </div>
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8, display: 'block' }}>MÔ TẢ</label>
+                  <textarea rows={3} value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} style={{ width: '100%', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text)', resize: 'none' }} />
+                </div>
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8, display: 'block' }}>HÌNH ẢNH ĐÃ CÓ</label>
+                  {formData.existing_images && formData.existing_images.length > 0 && (
+                    <div style={{ display: 'flex', gap: 8, overflowX: 'auto', marginBottom: 12 }}>
+                      {formData.existing_images.map((img: string, idx: number) => (
+                        <div key={idx} style={{ position: 'relative', width: 64, height: 64, borderRadius: 8, overflow: 'hidden', border: '1px solid var(--input-border)' }}>
+                          <img src={img} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setFormData({ ...formData, existing_images: formData.existing_images.filter((_: any, i: number) => i !== idx) });
+                            }}
+                            style={{ position: 'absolute', top: 2, right: 2, background: 'rgba(0,0,0,0.6)', color: '#fff', border: 'none', borderRadius: '50%', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 12, padding: 0 }}
+                          >✕</button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8, display: 'block' }}>THÊM HÌNH ẢNH MỚI (Tùy chọn)</label>
+                  <input type="file" multiple accept="image/*" onChange={e => setSelectedFiles(Array.from(e.target.files || []))} style={{ width: '100%', padding: '10px 14px', borderRadius: 8, border: '1px dashed var(--input-border)', color: 'var(--text-muted)' }} />
+                </div>
               </div>
             </div>
 
-            <button className="btn btn-primary" style={{ width: '100%' }} onClick={handleSave} disabled={saving}>
-              {saving ? 'Đang lưu...' : 'Lưu thiết bị'}
-            </button>
+            {/* Sticky Footer */}
+            <div style={{ padding: '16px 24px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
+              <button className="btn btn-primary" style={{ width: '100%' }} onClick={handleSave} disabled={saving}>
+                {saving ? 'Đang lưu...' : 'Lưu thiết bị'}
+              </button>
+            </div>
           </div>
         </div>,
         document.body
