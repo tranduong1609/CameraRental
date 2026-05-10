@@ -230,18 +230,18 @@ select {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   transition: all 0.3s ease;
-  /* Thêm padding để né tai thỏ (Notch) */
-  padding-top: env(safe-area-inset-top, 0px);
+  /* Ép khoảng trống phía trên tối thiểu 20px nếu safe-area không chạy */
+  padding-top: max(20px, env(safe-area-inset-top, 0px));
 }
 
 .navbar-inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 72px;
+  height: 64px; /* Giảm nhẹ chiều cao để trông thanh thoát hơn */
   max-width: 1280px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 20px;
 }
 
 .navbar-brand {
@@ -531,7 +531,8 @@ select {
 /* ── Hero ── */
 .hero {
   position: relative;
-  padding: 80px 0 60px;
+  /* Tăng padding top để không bị Navbar đè lên Search bar trên mobile */
+  padding: 100px 0 60px;
   overflow: hidden;
   background: linear-gradient(135deg, var(--bg), var(--surface));
 }
@@ -595,7 +596,8 @@ select {
   }
 
   .hero {
-    padding: 48px 0 40px;
+    /* Mobile cần khoảng cách lớn hơn để né Navbar sticky */
+    padding: 110px 0 40px;
   }
 }
 
