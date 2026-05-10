@@ -109,13 +109,35 @@ export default function AdminInventoryPage() {
 
   const formatCurrency = (amount: number) => amount?.toLocaleString('vi-VN') + ' ₫';
 
+  const readyCount = cameras.filter(c => c.available_quantity > 0).length;
+  const rentedCount = cameras.length - readyCount;
+  const totalCount = cameras.length;
+
   return (
     <div className="animate-fade-in" style={{ maxWidth: 1000, margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <h1 className="section-title" style={{ margin: 0 }}>Quản lý kho hàng</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
+        <div>
+          <h1 className="section-title" style={{ margin: 0 }}>Quản lý thiết bị</h1>
+          <div style={{ color: 'var(--text-muted)', fontSize: 14, marginTop: 4 }}>{totalCount} thiết bị trong kho</div>
+        </div>
         <button className="btn btn-primary" onClick={() => handleOpenModal()}>
-          <Plus size={18} /> Thêm thiết bị
+          <Plus size={18} /> Thêm
         </button>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 24 }}>
+        <div style={{ background: 'var(--surface-high)', padding: '16px', borderRadius: 12, borderLeft: '4px solid #10b981' }}>
+          <div style={{ fontSize: 24, fontWeight: 800 }}>{readyCount}</div>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Sẵn sàng</div>
+        </div>
+        <div style={{ background: 'var(--surface-high)', padding: '16px', borderRadius: 12, borderLeft: '4px solid #f59e0b' }}>
+          <div style={{ fontSize: 24, fontWeight: 800 }}>{rentedCount}</div>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Đang thuê</div>
+        </div>
+        <div style={{ background: 'var(--surface-high)', padding: '16px', borderRadius: 12, borderLeft: '4px solid var(--primary)' }}>
+          <div style={{ fontSize: 24, fontWeight: 800 }}>{totalCount}</div>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Tổng cộng</div>
+        </div>
       </div>
 
       {loading ? (
@@ -123,27 +145,53 @@ export default function AdminInventoryPage() {
       ) : (
         <div style={{ display: 'grid', gap: 16 }}>
           {cameras.map(camera => (
-            <div key={camera._id} className="card" style={{ padding: 16, display: 'flex', gap: 20, alignItems: 'center' }}>
-              <div style={{ width: 80, height: 80, borderRadius: 12, background: 'var(--surface-high)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {camera.images?.[0] ? (
-                  <img src={camera.images[0]} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 12 }} alt="" />
-                ) : (
-                  <Camera size={24} color="var(--text-muted)" />
-                )}
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 4 }}>
-                  <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--text-muted)' }}>{camera.brand}</div>
-                  <div style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 10, background: camera.available_quantity > 0 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', color: camera.available_quantity > 0 ? '#10b981' : '#ef4444' }}>
-                    Còn {camera.available_quantity}/{camera.total_quantity}
+            <div key={camera._id} className="card" style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ display: 'flex', gap: 16 }}>
+                <div style={{ width: 80, height: 80, borderRadius: 12, background: 'var(--surface-high)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  {camera.images?.[0] ? (
+                    <img src={camera.images[0]} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 12 }} alt="" />
+                  ) : (
+                    <Camera size={24} color="var(--text-muted)" />
+                  )}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{camera.name}</div>
+                  <div style={{ color: 'var(--text-muted)', fontSize: 12, marginBottom: 6 }}>
+                    {camera.brand} • {camera.category === 'accessory' ? 'Phụ kiện' : camera.category === 'lens' ? 'Ống kính' : camera.category}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ color: 'var(--primary)', fontWeight: 700, fontSize: 14 }}>{formatCurrency(camera.price_per_day)}/ngày</span>
+                    <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>SL: {camera.available_quantity}/{camera.total_quantity}</span>
                   </div>
                 </div>
-                <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 4 }}>{camera.name}</div>
-                <div style={{ color: 'var(--accent)', fontWeight: 700, fontSize: 15 }}>{formatCurrency(camera.price_per_day)}/ngày</div>
               </div>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button className="btn-icon" onClick={() => handleOpenModal(camera)}><Edit2 size={18} /></button>
-                <button className="btn-icon" style={{ color: '#ef4444' }} onClick={() => handleDelete(camera._id)}><Trash2 size={18} /></button>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
+                <div style={{ 
+                  display: 'inline-flex', alignItems: 'center', gap: 6, 
+                  padding: '4px 12px', borderRadius: 20, 
+                  background: camera.available_quantity > 0 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)', 
+                  color: camera.available_quantity > 0 ? '#10b981' : '#f59e0b',
+                  fontSize: 12, fontWeight: 600
+                }}>
+                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: camera.available_quantity > 0 ? '#10b981' : '#f59e0b' }}></div>
+                  {camera.available_quantity > 0 ? 'Sẵn sàng' : 'Đang cho thuê'}
+                </div>
+                
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button 
+                    style={{ width: 36, height: 36, borderRadius: 8, border: '1px solid var(--input-border)', background: 'transparent', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }} 
+                    onClick={() => handleOpenModal(camera)}
+                  >
+                    <Edit2 size={16} />
+                  </button>
+                  <button 
+                    style={{ width: 36, height: 36, borderRadius: 8, border: '1px solid rgba(239, 68, 68, 0.3)', background: 'transparent', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }} 
+                    onClick={() => handleDelete(camera._id)}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
               </div>
             </div>
           ))}
