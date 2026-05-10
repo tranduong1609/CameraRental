@@ -95,7 +95,7 @@ router.get('/', async (req, res) => {
       const conflictAgg = await Booking.aggregate([
         {
           $match: {
-            status: { $nin: ['cancelled', 'refunded', 'completed'] },
+            status: { $nin: ['cancelled', 'refunded', 'completed', 'returned'] },
             start_date: { $lt: new Date(end_date) },
             end_date: { $gt: new Date(start_date) },
           }
@@ -179,7 +179,7 @@ router.get('/:id', async (req, res) => {
       const Booking = require('../models/booking');
       const conflictCount = await Booking.countDocuments({
         camera_id: camera._id,
-        status: { $nin: ['cancelled', 'refunded', 'completed'] },
+        status: { $nin: ['cancelled', 'refunded', 'completed', 'returned'] },
         start_date: { $lt: new Date(end_date) },
         end_date: { $gt: new Date(start_date) },
       });

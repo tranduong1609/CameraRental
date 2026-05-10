@@ -50,10 +50,10 @@ router.post('/', authMiddleware, async (req, res) => {
     }
 
     // Kiểm tra camera còn số lượng trống trong khoảng ngày này không
-    // Chỉ đếm đơn đã thanh toán trở lên (pending không chiếm slot)
+    // Đếm tất cả đơn không ở trạng thái huỷ/hoàn/hoàn thành/đã trả
     const conflictCount = await Booking.countDocuments({
       camera_id,
-      status: { $in: ['paid', 'verified', 'active', 'returned'] },
+      status: { $nin: ['cancelled', 'refunded', 'completed', 'returned'] },
       start_date: { $lt: endDate },
       end_date: { $gt: startDate },
     });
@@ -99,10 +99,10 @@ router.post('/', authMiddleware, async (req, res) => {
     });
 
     // Cập nhật số lượng còn trống và trạng thái camera
-    // Chỉ đếm đơn đã thanh toán trở lên (pending không chiếm slot)
+    // Đếm tất cả đơn không ở trạng thái huỷ/hoàn/hoàn thành/đã trả
     const activeBookingsNow = await Booking.countDocuments({
       camera_id: camera._id,
-      status: { $in: ['paid', 'verified', 'active', 'returned'] },
+      status: { $nin: ['cancelled', 'refunded', 'completed', 'returned'] },
     });
     camera.available_quantity = Math.max(0, (camera.quantity || 1) - activeBookingsNow);
     if (camera.available_quantity === 0) {
@@ -220,10 +220,10 @@ router.put('/:id/cancel', authMiddleware, async (req, res) => {
     await booking.save();
 
     // Release camera availability if needed
-    // Chỉ đếm đơn đã thanh toán trở lên (pending không chiếm slot)
+    // Đếm tất cả đơn không ở trạng thái huỷ/hoàn/hoàn thành/đã trả
     const activeBookingsNow = await Booking.countDocuments({
       camera_id: booking.camera_id,
-      status: { $in: ['paid', 'verified', 'active', 'returned'] },
+      status: { $nin: ['cancelled', 'refunded', 'completed', 'returned'] },
     });
     
     const camera = await Camera.findById(booking.camera_id);

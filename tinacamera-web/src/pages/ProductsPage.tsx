@@ -20,6 +20,8 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState(searchParams.get('search') || '');
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || '');
+  const [startDate] = useState(searchParams.get('start_date') || '');
+  const [endDate] = useState(searchParams.get('end_date') || '');
   const [sort, setSort] = useState('newest');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -37,6 +39,8 @@ export default function ProductsPage() {
     const res = await cameraApi.getCameras({
       category: selectedCategory || undefined,
       search: search || undefined,
+      start_date: startDate || undefined,
+      end_date: endDate || undefined,
       sort, page: p, limit: 12,
     });
     if (res.ok && res.data) {
