@@ -43,8 +43,11 @@ export default function Chatbot() {
         }));
       history.push({ role: 'user', parts: [{ text: userMsg }] });
 
-      // 3. Call Gemini API directly from Frontend to bypass Render IP block
-      const API_KEY = "AIzaSyA2q-n8qR2pRrBnw_au0LFFo8-vOrJ7cXY";
+      // 3. Call Gemini API directly from Frontend
+      const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+      if (!API_KEY) {
+        throw new Error("Missing Gemini API Key. Vui lòng thiết lập VITE_GEMINI_API_KEY trong file .env");
+      }
       const systemPrompt = `Bạn là TinaBot – trợ lý tư vấn của TinaCamera. QUY TẮC: Trả lời tiếng Việt, thân thiện, ngắn gọn (dưới 3 câu). Chỉ tập trung thông tin thuê máy. Ngoài lề -> gọi 0888888888. SẢN PHẨM: ${productContext}`;
       
       const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${API_KEY}`, {
