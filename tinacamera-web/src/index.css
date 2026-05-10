@@ -590,6 +590,7 @@ select {
   .date-picker-input-wrapper {
     width: 100%;
     min-width: 0;
+    max-width: 100%;
   }
 
   .date-picker-input-wrapper input {
@@ -597,6 +598,10 @@ select {
     font-size: 14px !important;
     box-sizing: border-box !important;
     width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    -webkit-appearance: none;
+    appearance: none;
   }
 
   .date-picker-group>button {
