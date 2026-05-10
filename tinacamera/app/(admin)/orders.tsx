@@ -40,6 +40,8 @@ export default function AdminOrders() {
   const [cccdInfo, setCccdInfo] = useState<any>(null);
   const [showQrScanner, setShowQrScanner] = useState(false);
   const [qrScanned, setQrScanned] = useState(false);
+  const [zoom, setZoom] = useState(0);
+  const [torch, setTorch] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -602,10 +604,40 @@ export default function AdminOrders() {
                 style={{ flex: 1 }}
                 barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
                 onBarcodeScanned={qrScanned ? undefined : handleBarCodeScanned}
+                autofocus="on"
+                zoom={zoom}
+                enableTorch={torch}
               />
               <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center' }}>
                 <View style={{ width: 220, height: 220, borderWidth: 2, borderColor: colors.primary, borderRadius: 16 }} />
                 <Text style={{ color: '#fff', marginTop: 16, fontSize: 14 }}>Đưa mã QR trên CCCD vào khung</Text>
+              </View>
+              {/* Zoom controls */}
+              <View style={{ position: 'absolute', bottom: 40, left: 0, right: 0, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 20 }}>
+                <TouchableOpacity 
+                  onPress={() => setZoom(Math.max(0, zoom - 0.05))}
+                  style={{ width: 50, height: 50, borderRadius: 25, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center' }}
+                >
+                  <Ionicons name="remove" size={28} color="#fff" />
+                </TouchableOpacity>
+                
+                <View style={{ paddingHorizontal: 20, paddingVertical: 10, borderRadius: 20, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center' }}>
+                  <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>{Math.round(zoom * 20) / 2 + 1}x</Text>
+                </View>
+
+                <TouchableOpacity 
+                  onPress={() => setZoom(Math.min(1, zoom + 0.05))}
+                  style={{ width: 50, height: 50, borderRadius: 25, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center' }}
+                >
+                  <Ionicons name="add" size={28} color="#fff" />
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                  onPress={() => setTorch(!torch)}
+                  style={{ width: 50, height: 50, borderRadius: 25, backgroundColor: torch ? colors.primary : 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center', marginLeft: 10 }}
+                >
+                  <Ionicons name={torch ? "flash" : "flash-off"} size={24} color="#fff" />
+                </TouchableOpacity>
               </View>
             </View>
           </SafeAreaView>
