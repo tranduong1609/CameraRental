@@ -1473,6 +1473,25 @@ select {
   opacity: 0.4;
 }
 
+/* ── Admin Specific Grids ── */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.admin-inputs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .dashboard-grid, .admin-inputs-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ── Admin Layout (Responsive) ── */
 .admin-layout {
   display: flex;

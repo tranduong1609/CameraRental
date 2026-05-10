@@ -200,12 +200,12 @@ export default function OrdersPage() {
                     onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                   />
                   <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8 }}>
-                      <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--text-muted)' }}>{b.camera_id?.brand}</div>
-                        <div style={{ fontWeight: 600, fontSize: 16 }}>{b.camera_id?.name || 'Thiết bị'}</div>
+                        <div style={{ fontWeight: 600, fontSize: 16, lineHeight: 1.3 }}>{b.camera_id?.name || 'Thiết bị'}</div>
                       </div>
-                      <span className={`badge ${status.cls}`}>{status.label}</span>
+                      <span className={`badge ${status.cls}`} style={{ flexShrink: 0, marginTop: 2 }}>{status.label}</span>
                     </div>
                     <div style={{ display: 'flex', gap: 24, marginTop: 12, flexWrap: 'wrap', fontSize: 13, color: 'var(--text-muted)', alignItems: 'center' }}>
                       <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Calendar size={14} /> {formatDate(b.start_date)} → {formatDate(b.end_date)}</span>

@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { adminApi } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
-import { Search, CheckCircle, X, Camera, Calendar, Package, Clock, Truck, RotateCcw, Star, Ban } from 'lucide-react';
+import { Search, CheckCircle, X, Camera, Calendar, Package, Clock, Truck, RotateCcw, Star, Ban, QrCode } from 'lucide-react';
+import QRScannerModal from '../components/QRScannerModal';
 
 const STATUS_TABS = [
   { key: 'all', label: 'Tất cả' },
@@ -41,6 +42,7 @@ export default function AdminOrdersPage() {
   const [cccdNumber, setCccdNumber] = useState('');
   const [cccdName, setCccdName] = useState('');
   const [toast, setToast] = useState('');
+  const [showQRScanner, setShowQRScanner] = useState(false);
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -99,6 +101,20 @@ export default function AdminOrdersPage() {
       showToast('❌ ' + (res.message || 'Lỗi cập nhật'));
     }
     setUpdating(false);
+  };
+
+  const handleScanQR = (text: string) => {
+    setShowQRScanner(false);
+    // Find booking with this booking_code
+    const found = bookings.find(b => b.booking_code === text);
+    if (found) {
+      setSelectedBooking(found);
+      setCccdNumber('');
+      setCccdName('');
+      showToast(`Đã tìm thấy đơn ${text}`);
+    } else {
+      showToast(`❌ Không tìm thấy đơn hàng: ${text}`);
+    }
   };
 
   const formatCurrency = (n: number) => (n ?? 0).toLocaleString('vi-VN') + ' ₫';
@@ -192,7 +208,7 @@ export default function AdminOrdersPage() {
                 <div style={{ fontWeight: 700, marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
                   <Truck size={16} /> Giao máy cho khách
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
+                <div className="admin-inputs-grid" style={{ marginBottom: 14 }}>
                   <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                     <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)' }}>SỐ CCCD (tùy chọn)</span>
                     <input value={cccdNumber} onChange={e => setCccdNumber(e.target.value)}
@@ -276,15 +292,24 @@ export default function AdminOrdersPage() {
       <h1 className="section-title">Quản lý đơn thuê</h1>
 
       {/* Search */}
-      <div style={{ position: 'relative', marginBottom: 20 }}>
-        <Search size={17} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
-        <input
-          type="text"
-          placeholder="Tìm theo mã đơn, tên khách hàng..."
-          value={searchText}
-          onChange={e => setSearchText(e.target.value)}
-          style={{ width: '100%', padding: '12px 16px 12px 46px', borderRadius: 12, border: '1px solid var(--input-border)', background: 'var(--card-bg)', fontSize: 14, color: 'var(--text)' }}
-        />
+      <div style={{ position: 'relative', marginBottom: 20, display: 'flex', gap: 12 }}>
+        <div style={{ position: 'relative', flex: 1 }}>
+          <Search size={17} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
+          <input
+            type="text"
+            placeholder="Tìm theo mã đơn, tên khách hàng..."
+            value={searchText}
+            onChange={e => setSearchText(e.target.value)}
+            style={{ width: '100%', padding: '12px 16px 12px 46px', borderRadius: 12, border: '1px solid var(--input-border)', background: 'var(--card-bg)', fontSize: 14, color: 'var(--text)', boxSizing: 'border-box' }}
+          />
+        </div>
+        <button
+          onClick={() => setShowQRScanner(true)}
+          style={{ background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 12, padding: '0 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+          title="Quét mã QR"
+        >
+          <QrCode size={20} />
+        </button>
       </div>
 
       {/* Tabs */}
@@ -369,6 +394,14 @@ export default function AdminOrdersPage() {
 
       {/* Portal Modal */}
       {renderModal()}
+      
+      {/* QR Scanner */}
+      {showQRScanner && (
+        <QRScannerModal 
+          onClose={() => setShowQRScanner(false)} 
+          onScan={handleScanQR} 
+        />
+      )}
 
       {/* Toast */}
       {toast && (

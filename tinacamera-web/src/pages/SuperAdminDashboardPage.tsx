@@ -77,7 +77,7 @@ export default function SuperAdminDashboardPage() {
       </div>
 
       {/* Two-column layout */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+      <div className="dashboard-grid">
 
         {/* Recent users */}
         <div className="card" style={{ padding: 24 }}>
