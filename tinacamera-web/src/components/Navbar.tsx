@@ -44,7 +44,7 @@ export default function Navbar() {
       <div className="navbar-inner">
         <Link to="/" className="navbar-brand">
           <div className="navbar-brand-icon"><Camera size={18} /></div>
-          TinaCamera
+          <span>TinaCamera</span>
         </Link>
 
         <div className={`navbar-links ${menuOpen ? 'open' : ''}`}>

@@ -222,7 +222,8 @@ select {
 
 @media (max-width: 768px) {
   .container {
-    padding: 0 16px;
+    padding: 0 20px;
+    overflow-x: hidden;
   }
 }
 
@@ -257,6 +258,14 @@ select {
   font-weight: 800;
   color: var(--accent);
   letter-spacing: -0.5px;
+  flex: 1;
+  min-width: 0;
+}
+
+.navbar-brand span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .navbar-brand-icon {
@@ -305,7 +314,8 @@ select {
 
 @media (max-width: 768px) {
   .navbar-actions {
-    gap: 6px;
+    gap: 4px;
+    flex-shrink: 0;
   }
   .navbar-brand {
     font-size: 18px;
@@ -315,20 +325,30 @@ select {
     width: 32px;
     height: 32px;
     border-radius: 10px;
+    flex-shrink: 0;
   }
   .btn-icon {
     width: 36px;
     height: 36px;
     border-radius: 10px;
+    flex-shrink: 0;
   }
   .theme-toggle {
     width: 36px;
     height: 36px;
     border-radius: 10px;
+    flex-shrink: 0;
   }
   .btn-sm {
     padding: 6px 12px;
     font-size: 12px;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 400px) {
+  .navbar-brand span {
+    display: none;
   }
 }
 
@@ -514,6 +534,20 @@ select {
 }
 
 /* ── Date Picker ── */
+.date-picker-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  border: 1px solid var(--separator);
+  box-shadow: var(--shadow-lg);
+}
+
+@media (max-width: 640px) {
+  .date-picker-card {
+    padding: 16px;
+  }
+}
+
 .date-picker-group {
   display: flex;
   gap: 16px;

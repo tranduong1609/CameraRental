@@ -77,10 +77,7 @@ export default function HomePage() {
 
       {/* ── Date Picker Section ── */}
       <div className="container" style={{ marginTop: -28, position: 'relative', zIndex: 2 }}>
-        <div style={{
-          background: 'var(--card-bg)', borderRadius: 'var(--radius)', padding: '20px 24px',
-          border: '1px solid var(--separator)', boxShadow: 'var(--shadow-lg)',
-        }} className="animate-fade-in">
+        <div className="date-picker-card animate-fade-in">
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16, gap: 8 }}>
             <Calendar size={18} style={{ color: 'var(--accent)' }} />
             <span style={{ fontWeight: 700, fontSize: 15 }}>Chọn ngày thuê</span>
