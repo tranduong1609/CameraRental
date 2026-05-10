@@ -1317,3 +1317,107 @@ select {
 .breadcrumb .sep {
   opacity: 0.4;
 }
+
+/* ── Admin Layout (Responsive) ── */
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+  background: var(--background);
+}
+
+.admin-sidebar {
+  width: 260px;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-sidebar-super {
+  width: 272px;
+}
+
+.admin-main {
+  flex: 1;
+  margin-left: 260px;
+  padding: 32px;
+  overflow-y: auto;
+  background: var(--surface);
+  min-height: 100vh;
+}
+
+.admin-main-super {
+  margin-left: 272px;
+}
+
+@media (max-width: 768px) {
+  .admin-layout {
+    flex-direction: column;
+  }
+  
+  .admin-sidebar, .admin-sidebar-super {
+    width: 100%;
+    position: relative;
+    height: auto;
+    border-right: none !important;
+    border-bottom: 1px solid var(--separator);
+  }
+  
+  .admin-sidebar nav, .admin-sidebar-super nav {
+    flex-direction: row !important;
+    overflow-x: auto;
+    padding: 12px !important;
+    gap: 8px !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+  }
+  
+  .admin-sidebar nav::-webkit-scrollbar, .admin-sidebar-super nav::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
+  }
+  
+  .admin-sidebar nav a, .admin-sidebar-super nav a {
+    white-space: nowrap;
+    padding: 8px 16px !important;
+    font-size: 13px !important;
+  }
+  
+  .admin-sidebar nav div, .admin-sidebar-super nav div {
+    display: none; /* Hide separators/titles in horizontal mode */
+  }
+  
+  /* Make header compact on mobile */
+  .admin-sidebar > div:first-child, .admin-sidebar-super > div:first-child {
+    padding: 16px 20px !important;
+    padding-top: max(16px, env(safe-area-inset-top, 0px)) !important;
+  }
+  
+  /* Keep user footer but make it compact */
+  .admin-sidebar > div:last-child, .admin-sidebar-super > div:last-child {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px !important;
+    gap: 12px;
+  }
+  
+  .admin-sidebar > div:last-child > div, .admin-sidebar-super > div:last-child > div {
+    margin-bottom: 0 !important;
+    flex: 1;
+  }
+  
+  .admin-sidebar > div:last-child > button, .admin-sidebar-super > div:last-child > button {
+    width: auto !important;
+    padding: 8px 16px !important;
+  }
+  
+  .admin-main, .admin-main-super {
+    margin-left: 0;
+    padding: 16px;
+    padding-bottom: max(32px, env(safe-area-inset-bottom, 0px));
+  }
+}

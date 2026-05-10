@@ -53,17 +53,11 @@ export default function AdminLayout({ children, allowedRoles = ['store_owner', '
   const filteredNav = navItems.filter(item => item.roles.includes(user.role));
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--background)' }}>
+    <div className="admin-layout">
       {/* Sidebar */}
-      <aside style={{ 
-        width: 260, 
+      <aside className="admin-sidebar" style={{ 
         background: 'var(--card-bg)', 
         borderRight: '1px solid var(--separator)',
-        display: 'flex',
-        flexDirection: 'column',
-        position: 'fixed',
-        top: 0, bottom: 0, left: 0,
-        zIndex: 100
       }}>
         <div style={{ padding: '24px 20px', borderBottom: '1px solid var(--separator)' }}>
           <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none', color: 'var(--text)' }}>
@@ -125,7 +119,7 @@ export default function AdminLayout({ children, allowedRoles = ['store_owner', '
       </aside>
 
       {/* Main Content */}
-      <main style={{ flex: 1, marginLeft: 260, padding: 32, overflowY: 'auto', background: 'var(--surface)' }}>
+      <main className="admin-main">
         {children}
       </main>
     </div>

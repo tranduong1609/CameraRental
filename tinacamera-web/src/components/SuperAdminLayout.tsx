@@ -48,16 +48,10 @@ export default function SuperAdminLayout({ children }: SuperAdminLayoutProps) {
   ];
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--background)' }}>
+    <div className="admin-layout">
       {/* Sidebar */}
-      <aside style={{ 
-        width: 272, 
+      <aside className="admin-sidebar admin-sidebar-super" style={{ 
         background: 'linear-gradient(180deg, #1a1a2e 0%, #16213e 100%)',
-        display: 'flex',
-        flexDirection: 'column',
-        position: 'fixed',
-        top: 0, bottom: 0, left: 0,
-        zIndex: 100,
         boxShadow: '4px 0 24px rgba(0,0,0,0.15)',
       }}>
         {/* Logo */}
@@ -161,7 +155,7 @@ export default function SuperAdminLayout({ children }: SuperAdminLayoutProps) {
       </aside>
 
       {/* Main Content */}
-      <main style={{ flex: 1, marginLeft: 272, padding: 32, overflowY: 'auto', background: 'var(--surface)', minHeight: '100vh' }}>
+      <main className="admin-main admin-main-super">
         {children}
       </main>
     </div>
