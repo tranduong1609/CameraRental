@@ -214,6 +214,11 @@ export const adminApi = {
       headers: { Authorization: `Bearer ${token}` },
     }),
 
+  getEquipmentStats: (token: string) =>
+    request<any>('/admin/equipment-stats', {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
   getRevenue: (token: string, period: string = 'day', startDate?: string, endDate?: string) => {
     let url = `/admin/revenue?period=${period}`;
     if (period === 'custom' && startDate) url += `&start_date=${startDate}`;

@@ -45,6 +45,9 @@ export default function AdminDashboard() {
   const [customEndDate, setCustomEndDate] = useState('');
   const [markedDates, setMarkedDates] = useState<any>({});
   const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const [equipmentStats, setEquipmentStats] = useState<any>(null);
+  const [showAllEquipment, setShowAllEquipment] = useState(false);
+  const [chartData, setChartData] = useState<any[]>([]);
 
   const s = useMemo(() => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
@@ -89,14 +92,16 @@ export default function AdminDashboard() {
   const fetchData = useCallback(async () => {
     if (!token) return;
     try {
-      const [statsRes, bookingsRes] = await Promise.all([
+      const [statsRes, bookingsRes, eqRes] = await Promise.all([
         adminApi.getStats(token),
         adminApi.getBookings(token),
+        adminApi.getEquipmentStats(token),
       ]);
       if (statsRes.ok && statsRes.data) setStats(statsRes.data);
       if (bookingsRes.ok && bookingsRes.data?.bookings) {
         setRecentBookings(bookingsRes.data.bookings.slice(0, 5));
       }
+      if (eqRes.ok && eqRes.data) setEquipmentStats(eqRes.data);
     } catch (error) {
       console.error('Dashboard fetch error:', error);
     } finally {
@@ -120,6 +125,7 @@ export default function AdminDashboard() {
             amount: res.data.totalInPeriod,
             count: res.data.totalOrders
           });
+          setChartData(res.data.data || []);
         }
       } catch (error) {
         console.error('Fetch revenue error:', error);
@@ -245,6 +251,38 @@ export default function AdminDashboard() {
           </View>
         </TouchableOpacity>
 
+        {/* Revenue Chart */}
+        {chartData.length > 0 && (
+          <View style={{ marginHorizontal: 20, marginTop: 16, backgroundColor: colors.cardBackground, borderRadius: 20, padding: 16, borderWidth: 1, borderColor: colors.outlineVariant }}>
+            <View style={{ flexDirection: 'row', alignItems: 'flex-end', height: 120, paddingBottom: 20, paddingTop: 10, gap: 4 }}>
+              {chartData.map((d, i) => {
+                const maxRev = Math.max(...chartData.map(c => c.revenue), 1);
+                const heightPct = (d.revenue / maxRev) * 100;
+                // X label logic
+                let label = '';
+                if (revenuePeriod === 'today') label = d.label.split(':')[0] + 'h';
+                else if (revenuePeriod === 'month_current' || revenuePeriod === 'custom' || revenuePeriod === 'day') {
+                  const parts = d.label.split('-');
+                  label = parts.length === 3 ? `${parts[2]}/${parts[1]}` : d.label;
+                } else if (revenuePeriod === 'week') label = d.label.replace(/\d{4}-W/, 'T');
+                else label = d.label.split('-')[1] || d.label;
+
+                return (
+                  <View key={i} style={{ flex: 1, alignItems: 'center', height: '100%', justifyContent: 'flex-end' }}>
+                    {heightPct > 10 && (
+                      <Text style={{ fontSize: 8, color: colors.textMuted, marginBottom: 2, fontWeight: '600' }} numberOfLines={1}>
+                        {d.revenue >= 1000000 ? (d.revenue/1000000).toFixed(1)+'tr' : d.revenue > 0 ? (d.revenue/1000).toFixed(0)+'k' : ''}
+                      </Text>
+                    )}
+                    <View style={{ width: '80%', height: `${Math.max(heightPct, 2)}%`, backgroundColor: d.revenue > 0 ? colors.primary : colors.surfaceContainerHigh, borderRadius: 4 }} />
+                    <Text style={{ fontSize: 8, color: colors.textSecondary, position: 'absolute', bottom: -16 }} numberOfLines={1}>{label}</Text>
+                  </View>
+                );
+              })}
+            </View>
+          </View>
+        )}
+
         {/* Stats Grid */}
         <View style={s.statsGrid}>
           <View style={[s.statCard, { borderLeftColor: '#10b981' }]}>
@@ -264,6 +302,53 @@ export default function AdminDashboard() {
             <Text style={s.statLabel}>Hoàn tất</Text>
           </View>
         </View>
+
+        {/* Equipment Stats */}
+        {equipmentStats && (
+          <View style={{ marginTop: 24, marginHorizontal: 20 }}>
+            {/* Top Cameras */}
+            <View style={{ backgroundColor: colors.cardBackground, borderRadius: 20, padding: 20, borderWidth: 1, borderColor: colors.outlineVariant, marginBottom: 16 }}>
+              <Text style={{ color: colors.text, fontSize: 16, fontWeight: '700', marginBottom: 16 }}>🏆 Thiết bị thuê nhiều nhất</Text>
+              {(showAllEquipment ? equipmentStats.topCameras : equipmentStats.topCameras.slice(0, 3)).map((cam: any, i: number) => (
+                <View key={cam.camera_id} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+                  <Text style={{ color: colors.textMuted, fontWeight: '700', width: 20 }}>{i + 1}.</Text>
+                  <View style={{ width: 40, height: 40, borderRadius: 8, backgroundColor: colors.surfaceContainerHigh, justifyContent: 'center', alignItems: 'center', marginRight: 12 }}>
+                    <Text style={{ fontSize: 16 }}>📷</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ color: colors.text, fontSize: 14, fontWeight: '600' }}>{cam.name}</Text>
+                    <Text style={{ color: colors.textSecondary, fontSize: 12, marginTop: 2 }}>{cam.total_bookings} lần thuê • {(cam.total_revenue / 1000000).toFixed(1)}tr đ</Text>
+                  </View>
+                </View>
+              ))}
+              {equipmentStats.topCameras.length > 3 && (
+                <TouchableOpacity onPress={() => setShowAllEquipment(!showAllEquipment)} style={{ backgroundColor: colors.surfaceContainerHigh, padding: 10, borderRadius: 8, alignItems: 'center', marginTop: 4 }}>
+                  <Text style={{ color: colors.text, fontWeight: '600', fontSize: 13 }}>{showAllEquipment ? 'Thu gọn' : `Xem thêm ${equipmentStats.topCameras.length - 3} thiết bị`}</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+
+            {/* Category Stats */}
+            <View style={{ backgroundColor: colors.cardBackground, borderRadius: 20, padding: 20, borderWidth: 1, borderColor: colors.outlineVariant }}>
+              <Text style={{ color: colors.text, fontSize: 16, fontWeight: '700', marginBottom: 16 }}>📊 Phân bổ danh mục</Text>
+              {equipmentStats.categoryStats.map((cat: any) => {
+                const total = equipmentStats.categoryStats.reduce((s: number, c: any) => s + c.count, 0);
+                const pct = total > 0 ? Math.round((cat.count / total) * 100) : 0;
+                return (
+                  <View key={cat.category} style={{ marginBottom: 12 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
+                      <Text style={{ color: colors.text, fontSize: 13, fontWeight: '600', textTransform: 'capitalize' }}>{cat.category}</Text>
+                      <Text style={{ color: colors.textSecondary, fontSize: 13 }}>{pct}%</Text>
+                    </View>
+                    <View style={{ height: 6, backgroundColor: colors.surfaceContainerHigh, borderRadius: 3, overflow: 'hidden' }}>
+                      <View style={{ height: '100%', width: `${pct}%`, backgroundColor: colors.primary, borderRadius: 3 }} />
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+          </View>
+        )}
 
         {/* Recent Activity */}
         <View style={s.section}>

@@ -73,6 +73,8 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [chartLoading, setChartLoading] = useState(false);
   const [tooltip, setTooltip] = useState<any>({ visible: false });
+  const [equipmentStats, setEquipmentStats] = useState<any>(null);
+  const [showAllEquipment, setShowAllEquipment] = useState(false);
   const chartRef = useRef<HTMLDivElement>(null);
 
   // Custom date range
@@ -84,8 +86,12 @@ export default function AdminDashboardPage() {
   // Load stats once
   useEffect(() => {
     if (!token) return;
-    adminApi.getStats(token).then(res => {
-      if (res.ok) setStats(res.data);
+    Promise.all([
+      adminApi.getStats(token),
+      adminApi.getEquipmentStats(token)
+    ]).then(([statsRes, eqRes]) => {
+      if (statsRes.ok) setStats(statsRes.data);
+      if (eqRes.ok) setEquipmentStats(eqRes.data);
       setLoading(false);
     });
   }, [token]);
@@ -321,6 +327,80 @@ export default function AdminDashboardPage() {
           </div>
         )}
       </div>
+
+      {/* ── Equipment Stats ── */}
+      {equipmentStats && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24, marginTop: 24 }}>
+          {/* Top Cameras */}
+          <div className="card" style={{ padding: 24 }}>
+            <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+              🏆 Thiết bị thuê nhiều nhất
+            </h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {(showAllEquipment ? equipmentStats.topCameras : equipmentStats.topCameras.slice(0, 3)).map((cam: any, i: number) => (
+                <div key={cam.camera_id} style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                  <div style={{ width: 24, fontWeight: 700, color: 'var(--text-muted)' }}>{i + 1}.</div>
+                  {cam.image ? (
+                    <img src={cam.image} alt={cam.name} style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'cover' }} />
+                  ) : (
+                    <div style={{ width: 40, height: 40, borderRadius: 8, background: 'var(--surface-high)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>📷</div>
+                  )}
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 600, fontSize: 14 }}>{cam.name}</div>
+                    <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
+                      {cam.total_bookings} lần thuê • {(cam.total_revenue / 1000000).toFixed(1)}tr ₫
+                    </div>
+                  </div>
+                </div>
+              ))}
+              
+              {equipmentStats.topCameras.length > 3 && (
+                <button 
+                  onClick={() => setShowAllEquipment(!showAllEquipment)}
+                  style={{ 
+                    background: 'var(--surface-high)', border: 'none', padding: '10px', 
+                    borderRadius: 8, color: 'var(--text)', fontWeight: 600, cursor: 'pointer',
+                    marginTop: 8, transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--accent-dim)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'var(--surface-high)'}
+                >
+                  {showAllEquipment ? 'Thu gọn' : `Xem thêm ${equipmentStats.topCameras.length - 3} thiết bị`}
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Category Distribution */}
+          <div className="card" style={{ padding: 24 }}>
+            <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+              📊 Phân bổ danh mục
+            </h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {equipmentStats.categoryStats.map((cat: any) => {
+                const total = equipmentStats.categoryStats.reduce((sum: number, c: any) => sum + c.count, 0);
+                const pct = total > 0 ? Math.round((cat.count / total) * 100) : 0;
+                return (
+                  <div key={cat.category}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 4 }}>
+                      <span style={{ fontWeight: 600, textTransform: 'capitalize' }}>{cat.category}</span>
+                      <span style={{ color: 'var(--text-muted)' }}>{pct}% ({cat.count})</span>
+                    </div>
+                    <div style={{ height: 8, background: 'var(--surface-high)', borderRadius: 4, overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${pct}%`, background: 'var(--accent)', borderRadius: 4 }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            
+            <div style={{ marginTop: 24, paddingTop: 16, borderTop: '1px solid var(--separator)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>Tỉ lệ sử dụng thiết bị</div>
+              <div style={{ fontWeight: 800, color: '#10b981' }}>{equipmentStats.summary.utilization_rate}%</div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

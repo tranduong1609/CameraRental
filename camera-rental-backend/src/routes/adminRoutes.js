@@ -206,6 +206,92 @@ router.get('/revenue', async (req, res) => {
 });
 
 // ─────────────────────────────────────
+//  GET /api/admin/equipment-stats
+//  Thống kê thiết bị được thuê nhiều và danh mục
+// ─────────────────────────────────────
+router.get('/equipment-stats', async (req, res) => {
+  try {
+    const validStatuses = ['paid', 'verified', 'active', 'returned', 'completed', 'cancelled', 'refunded'];
+    
+    // Top cameras
+    const topCamerasRaw = await Booking.aggregate([
+      { $match: { status: { $in: validStatuses }, camera_id: { $exists: true, $ne: null } } },
+      {
+        $group: {
+          _id: '$camera_id',
+          count: { 
+            $sum: { $cond: [{ $eq: ['$status', 'cancelled'] }, 0, 1] } 
+          },
+          revenue: {
+            $sum: {
+              $subtract: [
+                { $ifNull: ['$paid_amount', 0] },
+                { $ifNull: ['$refund_amount', 0] }
+              ]
+            }
+          }
+        }
+      },
+      { $sort: { count: -1, revenue: -1 } },
+      {
+        $lookup: {
+          from: 'cameras',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'cameraInfo'
+        }
+      },
+      { $unwind: '$cameraInfo' }
+    ]);
+
+    const topCameras = topCamerasRaw.map(item => ({
+      camera_id: item._id,
+      name: item.cameraInfo.name,
+      brand: item.cameraInfo.brand,
+      category: item.cameraInfo.category,
+      image: item.cameraInfo.images && item.cameraInfo.images.length > 0 ? item.cameraInfo.images[0] : null,
+      total_bookings: item.count,
+      total_revenue: item.revenue,
+      avg_rating: item.cameraInfo.rating_avg || 0
+    }));
+
+    // Category stats
+    const categoryStats = topCameras.reduce((acc, curr) => {
+      const cat = curr.category || 'other';
+      if (!acc[cat]) {
+        acc[cat] = { category: cat, count: 0, revenue: 0 };
+      }
+      acc[cat].count += curr.total_bookings;
+      acc[cat].revenue += curr.total_revenue;
+      return acc;
+    }, {});
+
+    const categoryArray = Object.values(categoryStats).sort((a: any, b: any) => b.count - a.count);
+
+    // Summary
+    const totalEquipment = await Camera.countDocuments();
+    const currentlyRented = await Booking.countDocuments({ status: 'active', camera_id: { $exists: true, $ne: null } });
+    
+    // Tổng số lượng máy (cộng dồn available_quantity ban đầu nếu có lưu, tạm thời lấy countDocuments)
+    // Tỉ lệ sử dụng = (máy đang thuê / tổng máy) * 100
+    const utilization_rate = totalEquipment > 0 ? Math.round((currentlyRented / totalEquipment) * 100) : 0;
+
+    res.json({
+      topCameras,
+      categoryStats: categoryArray,
+      summary: {
+        total_equipment: totalEquipment,
+        currently_rented: currentlyRented,
+        utilization_rate
+      }
+    });
+  } catch (error) {
+    console.error('Equipment stats error:', error);
+    res.status(500).json({ message: 'Lỗi server.' });
+  }
+});
+
+// ─────────────────────────────────────
 //  GET /api/admin/bookings
 //  Lấy tất cả đơn hàng (hỗ trợ filter + tìm kiếm)
 // ─────────────────────────────────────
