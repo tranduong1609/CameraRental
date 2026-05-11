@@ -4,10 +4,10 @@ import { useAuth } from '../contexts/AuthContext';
 import { Camera, ShoppingCart, Users, DollarSign, TrendingUp, Calendar, BarChart2, ArrowUpRight } from 'lucide-react';
 
 const PERIOD_OPTIONS = [
-  { key: 'today',         label: 'Hôm nay' },
+  { key: 'today', label: 'Hôm nay' },
   { key: 'month_current', label: 'Tháng này' },
-  { key: 'month3',        label: '3 tháng' },
-  { key: 'custom',        label: 'Tùy chọn' },
+  { key: 'month3', label: '3 tháng' },
+  { key: 'custom', label: 'Tùy chọn' },
 ];
 
 function formatPrice(n?: number) {
@@ -143,7 +143,7 @@ export default function AdminDashboardPage() {
         <StatCard
           icon={<DollarSign size={24} />}
           iconBg="rgba(59,130,246,0.12)" iconColor="#3b82f6"
-          label="Doanh thu tháng"
+          label="Doanh thu"
           value={formatPrice(revenue?.totalInPeriod)}
           large
         />
@@ -240,16 +240,13 @@ export default function AdminDashboardPage() {
         ) : (
           <div ref={chartRef} style={{ position: 'relative', height: 300 }}>
             {/* Y-axis + Grid */}
-            <div style={{ position: 'absolute', inset: 0, paddingBottom: 36, paddingLeft: 80 }}>
+            <div style={{ position: 'absolute', inset: 0, paddingBottom: 36, paddingLeft: 90 }}>
               {yTicks.map(tick => (
                 <div key={tick.pct} style={{
                   position: 'absolute', left: 0, right: 0,
                   bottom: `calc(36px + ${tick.pct}% * (100% - 36px) / 100)`,
                   display: 'flex', alignItems: 'center', gap: 8,
                 }}>
-                  <div style={{ width: 72, textAlign: 'right', fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, flexShrink: 0, marginLeft: -80 }}>
-                    {formatPrice(tick.value)}
-                  </div>
                   <div style={{ flex: 1, height: 1, background: tick.pct === 0 ? 'var(--separator)' : 'rgba(0,0,0,0.05)', borderTop: tick.pct === 0 ? '2px solid var(--separator)' : undefined }} />
                 </div>
               ))}
@@ -257,7 +254,7 @@ export default function AdminDashboardPage() {
 
             {/* Bars */}
             <div style={{
-              position: 'absolute', bottom: 0, left: 80, right: 0, height: '100%',
+              position: 'absolute', bottom: 0, left: 90, right: 0, height: '100%',
               display: 'flex', alignItems: 'flex-end', gap: 6, paddingBottom: 36,
             }}>
               {chartData.map((d: any, i: number) => {
@@ -357,12 +354,12 @@ export default function AdminDashboardPage() {
                   </div>
                 </div>
               ))}
-              
+
               {equipmentStats.topCameras.length > 3 && (
-                <button 
+                <button
                   onClick={() => setShowAllEquipment(!showAllEquipment)}
-                  style={{ 
-                    background: 'var(--surface-high)', border: 'none', padding: '10px', 
+                  style={{
+                    background: 'var(--surface-high)', border: 'none', padding: '10px',
                     borderRadius: 8, color: 'var(--text)', fontWeight: 600, cursor: 'pointer',
                     marginTop: 8, transition: 'all 0.2s'
                   }}
@@ -397,7 +394,7 @@ export default function AdminDashboardPage() {
                 );
               })}
             </div>
-            
+
           </div>
         </div>
       )}
