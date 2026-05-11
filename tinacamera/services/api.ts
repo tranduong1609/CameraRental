@@ -292,10 +292,15 @@ export const adminApi = {
       headers: { Authorization: `Bearer ${token}` },
     }),
 
-  getEquipmentStats: (token: string) =>
-    request<any>('/admin/equipment-stats', {
+  getEquipmentStats: (token: string, period?: string, startDate?: string, endDate?: string) => {
+    let url = '/admin/equipment-stats';
+    if (period) url += `?period=${period}`;
+    if (period === 'custom' && startDate) url += `&start_date=${startDate}`;
+    if (period === 'custom' && endDate) url += `&end_date=${endDate}`;
+    return request<any>(url, {
       headers: { Authorization: `Bearer ${token}` },
-    }),
+    });
+  },
 
   getRevenue: (token: string, period: string = 'day', startDate?: string, endDate?: string) => {
     let url = `/admin/revenue?period=${period}`;

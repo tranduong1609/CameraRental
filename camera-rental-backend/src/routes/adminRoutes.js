@@ -211,11 +211,43 @@ router.get('/revenue', async (req, res) => {
 // ─────────────────────────────────────
 router.get('/equipment-stats', async (req, res) => {
   try {
+    const { period = 'all', start_date, end_date } = req.query;
+    const now = new Date();
+    let startDateFilter = null;
+    let endDateFilter = null;
+
+    if (period === 'today') {
+      startDateFilter = new Date(now);
+      startDateFilter.setHours(0, 0, 0, 0);
+    } else if (period === 'month_current') {
+      startDateFilter = new Date(now.getFullYear(), now.getMonth(), 1);
+      startDateFilter.setHours(0, 0, 0, 0);
+    } else if (period === 'month3') {
+      startDateFilter = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+      startDateFilter.setHours(0, 0, 0, 0);
+    } else if (period === 'custom') {
+      if (start_date) {
+        startDateFilter = new Date(start_date);
+        startDateFilter.setHours(0, 0, 0, 0);
+      }
+      if (end_date) {
+        endDateFilter = new Date(end_date);
+        endDateFilter.setHours(23, 59, 59, 999);
+      }
+    }
+
     const validStatuses = ['paid', 'verified', 'active', 'returned', 'completed', 'cancelled', 'refunded'];
     
+    const matchCondition = { status: { $in: validStatuses }, camera_id: { $exists: true, $ne: null } };
+    if (startDateFilter || endDateFilter) {
+      matchCondition.createdAt = {};
+      if (startDateFilter) matchCondition.createdAt.$gte = startDateFilter;
+      if (endDateFilter) matchCondition.createdAt.$lte = endDateFilter;
+    }
+
     // Top cameras
     const topCamerasRaw = await Booking.aggregate([
-      { $match: { status: { $in: validStatuses }, camera_id: { $exists: true, $ne: null } } },
+      { $match: matchCondition },
       {
         $group: {
           _id: '$camera_id',

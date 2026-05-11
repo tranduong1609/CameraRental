@@ -92,16 +92,14 @@ export default function AdminDashboard() {
   const fetchData = useCallback(async () => {
     if (!token) return;
     try {
-      const [statsRes, bookingsRes, eqRes] = await Promise.all([
+      const [statsRes, bookingsRes] = await Promise.all([
         adminApi.getStats(token),
         adminApi.getBookings(token),
-        adminApi.getEquipmentStats(token),
       ]);
       if (statsRes.ok && statsRes.data) setStats(statsRes.data);
       if (bookingsRes.ok && bookingsRes.data?.bookings) {
         setRecentBookings(bookingsRes.data.bookings.slice(0, 5));
       }
-      if (eqRes.ok && eqRes.data) setEquipmentStats(eqRes.data);
     } catch (error) {
       console.error('Dashboard fetch error:', error);
     } finally {
@@ -119,7 +117,11 @@ export default function AdminDashboard() {
     const fetchPeriod = async () => {
       if (!token) return;
       try {
-        const res = await adminApi.getRevenue(token, revenuePeriod, customStartDate, customEndDate);
+        const [res, eqRes] = await Promise.all([
+          adminApi.getRevenue(token, revenuePeriod, customStartDate, customEndDate),
+          adminApi.getEquipmentStats(token, revenuePeriod, customStartDate, customEndDate)
+        ]);
+        
         if (res.ok && res.data) {
           setPeriodRevenue({
             amount: res.data.totalInPeriod,
@@ -127,8 +129,11 @@ export default function AdminDashboard() {
           });
           setChartData(res.data.data || []);
         }
+        if (eqRes.ok && eqRes.data) {
+          setEquipmentStats(eqRes.data);
+        }
       } catch (error) {
-        console.error('Fetch revenue error:', error);
+        console.error('Fetch period error:', error);
       }
     };
     fetchPeriod();
@@ -269,9 +274,9 @@ export default function AdminDashboard() {
 
                 return (
                   <View key={i} style={{ flex: 1, alignItems: 'center', height: '100%', justifyContent: 'flex-end' }}>
-                    {heightPct > 10 && (
+                    {d.revenue > 0 && (
                       <Text style={{ fontSize: 8, color: colors.textMuted, marginBottom: 2, fontWeight: '600' }} numberOfLines={1}>
-                        {d.revenue >= 1000000 ? (d.revenue/1000000).toFixed(1)+'tr' : d.revenue > 0 ? (d.revenue/1000).toFixed(0)+'k' : ''}
+                        {d.revenue >= 1000000 ? (d.revenue/1000000).toFixed(1)+'tr' : (d.revenue/1000).toFixed(0)+'k'}
                       </Text>
                     )}
                     <View style={{ width: '80%', height: `${Math.max(heightPct, 2)}%`, backgroundColor: d.revenue > 0 ? colors.primary : colors.surfaceContainerHigh, borderRadius: 4 }} />

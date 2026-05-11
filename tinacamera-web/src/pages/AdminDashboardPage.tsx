@@ -86,12 +86,8 @@ export default function AdminDashboardPage() {
   // Load stats once
   useEffect(() => {
     if (!token) return;
-    Promise.all([
-      adminApi.getStats(token),
-      adminApi.getEquipmentStats(token)
-    ]).then(([statsRes, eqRes]) => {
-      if (statsRes.ok) setStats(statsRes.data);
-      if (eqRes.ok) setEquipmentStats(eqRes.data);
+    adminApi.getStats(token).then(res => {
+      if (res.ok) setStats(res.data);
       setLoading(false);
     });
   }, [token]);
@@ -101,13 +97,22 @@ export default function AdminDashboardPage() {
     if (!token) return;
     if (period === 'custom' && (!customStart || !customEnd)) return;
     setChartLoading(true);
-    adminApi.getRevenue(
-      token,
-      period,
-      period === 'custom' ? customStart : undefined,
-      period === 'custom' ? customEnd : undefined,
-    ).then(res => {
+    Promise.all([
+      adminApi.getRevenue(
+        token,
+        period,
+        period === 'custom' ? customStart : undefined,
+        period === 'custom' ? customEnd : undefined,
+      ),
+      adminApi.getEquipmentStats(
+        token,
+        period,
+        period === 'custom' ? customStart : undefined,
+        period === 'custom' ? customEnd : undefined,
+      )
+    ]).then(([res, eqRes]) => {
       if (res.ok) setRevenue(res.data);
+      if (eqRes.ok) setEquipmentStats(eqRes.data);
       setChartLoading(false);
     });
   }, [token, period, customStart, customEnd]);
