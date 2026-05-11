@@ -171,7 +171,6 @@ export default function AdminDashboardPage() {
               <h2 style={{ fontSize: 18, fontWeight: 800, margin: 0 }}>Biểu đồ doanh thu</h2>
             </div>
             <div style={{ fontSize: 13, color: 'var(--text-muted)', display: 'flex', gap: 16 }}>
-              <span>Tổng: <strong style={{ color: 'var(--accent)' }}>{revenue?.totalInPeriod?.toLocaleString('vi-VN')} ₫</strong></span>
               <span>{revenue?.totalOrders ?? 0} đơn</span>
             </div>
           </div>
@@ -353,7 +352,7 @@ export default function AdminDashboardPage() {
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 600, fontSize: 14 }}>{cam.name}</div>
                     <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
-                      {cam.total_bookings} lần thuê • {(cam.total_revenue / 1000000).toFixed(1)}tr ₫
+                      {cam.total_bookings} lần thuê
                     </div>
                   </div>
                 </div>
@@ -399,10 +398,6 @@ export default function AdminDashboardPage() {
               })}
             </div>
             
-            <div style={{ marginTop: 24, paddingTop: 16, borderTop: '1px solid var(--separator)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>Tỉ lệ sử dụng thiết bị</div>
-              <div style={{ fontWeight: 800, color: '#10b981' }}>{equipmentStats.summary.utilization_rate}%</div>
-            </div>
           </div>
         </div>
       )}
