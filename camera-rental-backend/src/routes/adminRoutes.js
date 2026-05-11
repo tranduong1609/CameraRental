@@ -558,10 +558,18 @@ router.post('/cameras', upload.array('images', 5), async (req, res) => {
     const imageUrls = req.files ? req.files.map(file => file.secure_url || file.url || file.path) : [];
     const qty = quantity ? Math.max(1, parseInt(quantity)) : 1;
 
+    // Tìm store của user đang đăng nhập, nếu không có thì lấy store đầu tiên trong DB
+    const Store = require('../models/store');
+    let store = await Store.findOne({ owner_id: req.user.id });
+    if (!store) {
+      store = await Store.findOne(); // Lấy đại 1 cái nếu không thấy cái của mình
+    }
+    const finalStoreId = store ? store._id : '000000000000000000000000';
+
     const newCamera = new Camera({
       name, brand, model, category, description,
       price_per_day, price_per_week, deposit_amount,
-      store_id: store_id || '000000000000000000000000',
+      store_id: finalStoreId,
       included_items: included_items ? JSON.parse(included_items) : [],
       specs: specs ? JSON.parse(specs) : {},
       images: imageUrls,

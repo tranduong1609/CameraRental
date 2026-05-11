@@ -15,10 +15,54 @@ const CATEGORIES = [
   { key: 'accessory', label: 'Phụ kiện' },
 ];
 
+const COMMON_ACCESSORIES = [
+  'Pin chính hãng', 'Pin dự phòng', 'Sạc pin', 'Sạc USB-C',
+  'Túi máy', 'Dây đeo', 'Thẻ nhớ 64GB', 'Thẻ nhớ 128GB',
+  'Filter UV', 'Hood lens', 'Tripod', 'Remote shutter',
+  'Đầu đọc thẻ', 'Cáp truyền dữ liệu',
+];
+
+const SPEC_TEMPLATES: Record<string, { key: string; label: string }[]> = {
+  mirrorless: [
+    { key: 'sensor', label: 'Cảm biến' },
+    { key: 'resolution', label: 'Độ phân giải' },
+    { key: 'iso', label: 'ISO' },
+    { key: 'video', label: 'Video' },
+    { key: 'weight', label: 'Trọng lượng' },
+    { key: 'stabilization', label: 'Chống rung' },
+  ],
+  dslr: [
+    { key: 'sensor', label: 'Cảm biến' },
+    { key: 'resolution', label: 'Độ phân giải' },
+    { key: 'iso', label: 'ISO' },
+    { key: 'fps', label: 'Tốc độ chụp liên tiếp' },
+    { key: 'weight', label: 'Trọng lượng' },
+  ],
+  film: [
+    { key: 'film_format', label: 'Định dạng phim' },
+    { key: 'lens_mount', label: 'Ngàm ống kính' },
+    { key: 'shutter_speed', label: 'Tốc độ màn trập' },
+    { key: 'weight', label: 'Trọng lượng' },
+  ],
+  lens: [
+    { key: 'focal_length', label: 'Tiêu cự' },
+    { key: 'aperture', label: 'Khẩu độ' },
+    { key: 'lens_mount', label: 'Ngàm' },
+    { key: 'stabilization', label: 'Chống rung' },
+    { key: 'weight', label: 'Trọng lượng' },
+  ],
+  accessory: [
+    { key: 'type', label: 'Loại' },
+    { key: 'compatibility', label: 'Tương thích' },
+    { key: 'weight', label: 'Trọng lượng' },
+  ],
+};
+
 const EMPTY_FORM = {
   name: '', brand: '', model: '', category: 'mirrorless',
   description: '', price_per_day: '', price_per_week: '',
   deposit_amount: '', included_items: [] as string[],
+  specs: {} as Record<string, string>,
   quantity: '1',
 };
 
@@ -35,6 +79,8 @@ export default function AdminInventory() {
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [newImages, setNewImages] = useState<string[]>([]);
   const [accessoryInput, setAccessoryInput] = useState('');
+  const [specKeyInput, setSpecKeyInput] = useState('');
+  const [specValueInput, setSpecValueInput] = useState('');
 
   const s = useMemo(() => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
@@ -114,6 +160,7 @@ export default function AdminInventory() {
       price_per_week: cam.price_per_week?.toString() || '',
       deposit_amount: cam.deposit_amount?.toString() || '',
       included_items: cam.included_items || [],
+      specs: cam.specs || {},
       quantity: cam.quantity?.toString() || '1',
     });
     setEditingId(cam._id);
@@ -170,6 +217,7 @@ export default function AdminInventory() {
         price_per_week: form.price_per_week ? Number(form.price_per_week) : undefined,
         deposit_amount: Number(form.deposit_amount),
         included_items: form.included_items.length > 0 ? form.included_items : undefined,
+        specs: Object.keys(form.specs).length > 0 ? form.specs : undefined,
         quantity: form.quantity ? Number(form.quantity) : 1,
       };
 
@@ -408,13 +456,108 @@ export default function AdminInventory() {
               </View>
             </View>
 
+            {/* ── Thông số kỹ thuật ── */}
+            <Text style={s.formLabel}>Thông số kỹ thuật</Text>
+            <View style={{ marginBottom: 14 }}>
+              {/* Template specs theo danh mục */}
+              {(SPEC_TEMPLATES[form.category] || []).map((spec) => (
+                <View key={spec.key} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8, gap: 8 }}>
+                  <Text style={{ color: colors.textMuted, fontSize: 13, width: 110, fontWeight: '600' }}>{spec.label}</Text>
+                  <TextInput
+                    style={[s.formInput, { flex: 1, marginBottom: 0 }]}
+                    value={form.specs[spec.key] || ''}
+                    onChangeText={(v) => setForm({ ...form, specs: { ...form.specs, [spec.key]: v } })}
+                    placeholder={`Nhập ${spec.label.toLowerCase()}...`}
+                    placeholderTextColor={colors.placeholder}
+                  />
+                </View>
+              ))}
+              {/* Thêm thông số tùy chỉnh */}
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4, gap: 8 }}>
+                <TextInput
+                  style={[s.formInput, { flex: 1, marginBottom: 0 }]}
+                  value={specKeyInput}
+                  onChangeText={setSpecKeyInput}
+                  placeholder="Tên thông số"
+                  placeholderTextColor={colors.placeholder}
+                />
+                <TextInput
+                  style={[s.formInput, { flex: 1, marginBottom: 0 }]}
+                  value={specValueInput}
+                  onChangeText={setSpecValueInput}
+                  placeholder="Giá trị"
+                  placeholderTextColor={colors.placeholder}
+                />
+                <TouchableOpacity
+                  style={{ backgroundColor: colors.primary, borderRadius: 12, padding: 10 }}
+                  onPress={() => {
+                    const k = specKeyInput.trim();
+                    const v = specValueInput.trim();
+                    if (k && v) {
+                      setForm({ ...form, specs: { ...form.specs, [k]: v } });
+                      setSpecKeyInput('');
+                      setSpecValueInput('');
+                    }
+                  }}
+                >
+                  <Ionicons name="add" size={20} color={colors.onPrimary} />
+                </TouchableOpacity>
+              </View>
+              {/* Hiển thị specs đã thêm ngoài template */}
+              {Object.entries(form.specs)
+                .filter(([key]) => !(SPEC_TEMPLATES[form.category] || []).some(s => s.key === key))
+                .filter(([, val]) => val)
+                .map(([key, val]) => (
+                  <View key={key} style={{ flexDirection: 'row', alignItems: 'center', marginTop: 6, gap: 8 }}>
+                    <Text style={{ color: colors.textMuted, fontSize: 13, width: 110, fontWeight: '600' }}>{key}</Text>
+                    <Text style={{ color: colors.text, fontSize: 13, flex: 1 }}>{val}</Text>
+                    <TouchableOpacity onPress={() => {
+                      const updated = { ...form.specs };
+                      delete updated[key];
+                      setForm({ ...form, specs: updated });
+                    }}>
+                      <Ionicons name="close-circle" size={18} color="#ef4444" />
+                    </TouchableOpacity>
+                  </View>
+                ))}
+            </View>
+
+            {/* ── Phụ kiện đi kèm ── */}
             <Text style={s.formLabel}>Phụ kiện đi kèm</Text>
+            {/* Gợi ý có sẵn */}
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
+              {COMMON_ACCESSORIES.map((acc) => {
+                const isSelected = form.included_items.includes(acc);
+                return (
+                  <TouchableOpacity
+                    key={acc}
+                    onPress={() => {
+                      if (isSelected) {
+                        setForm({ ...form, included_items: form.included_items.filter((i: string) => i !== acc) });
+                      } else {
+                        setForm({ ...form, included_items: [...form.included_items, acc] });
+                      }
+                    }}
+                    style={{
+                      flexDirection: 'row', alignItems: 'center',
+                      backgroundColor: isSelected ? colors.primary + '20' : colors.surfaceContainerHigh,
+                      borderRadius: 10, paddingHorizontal: 10, paddingVertical: 6,
+                      borderWidth: 1, borderColor: isSelected ? colors.primary : colors.outlineVariant,
+                    }}
+                  >
+                    <Ionicons name={isSelected ? 'checkmark-circle' : 'add-circle-outline'} size={14} color={isSelected ? colors.primary : colors.textMuted} />
+                    <Text style={{ color: isSelected ? colors.primary : colors.text, fontSize: 12, marginLeft: 5, fontWeight: isSelected ? '600' : '400' }}>{acc}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+            {/* Thêm phụ kiện tùy chỉnh */}
             <View style={{ flexDirection: 'row', marginBottom: 8 }}>
               <TextInput
                 style={[s.formInput, { flex: 1, marginBottom: 0, marginRight: 8 }]}
                 value={accessoryInput}
                 onChangeText={setAccessoryInput}
-                placeholder="VD: Pin dự phòng, Túi máy..."
+                placeholder="Thêm phụ kiện khác..."
                 placeholderTextColor={colors.placeholder}
                 onSubmitEditing={() => {
                   const trimmed = accessoryInput.trim();
@@ -438,17 +581,17 @@ export default function AdminInventory() {
                 <Ionicons name="add" size={22} color={colors.onPrimary} />
               </TouchableOpacity>
             </View>
-            {form.included_items.length > 0 && (
+            {/* Hiển thị phụ kiện custom (không nằm trong COMMON) */}
+            {form.included_items.filter((item: string) => !COMMON_ACCESSORIES.includes(item)).length > 0 && (
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 14 }}>
-                {form.included_items.map((item: string, idx: number) => (
+                {form.included_items.filter((item: string) => !COMMON_ACCESSORIES.includes(item)).map((item: string, idx: number) => (
                   <View key={idx} style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surfaceContainerHigh, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 6, borderWidth: 1, borderColor: colors.outlineVariant }}>
                     <Ionicons name="checkmark-circle" size={14} color="#10b981" />
                     <Text style={{ color: colors.text, fontSize: 13, marginLeft: 5 }}>{item}</Text>
                     <TouchableOpacity
                       style={{ marginLeft: 8 }}
                       onPress={() => {
-                        const updated = form.included_items.filter((_: string, i: number) => i !== idx);
-                        setForm({ ...form, included_items: updated });
+                        setForm({ ...form, included_items: form.included_items.filter((i: string) => i !== item) });
                       }}
                     >
                       <Ionicons name="close-circle" size={16} color="#ef4444" />

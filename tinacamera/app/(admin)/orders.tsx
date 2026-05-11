@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, TextInput, RefreshControl, ActivityIndicator, Alert, StyleSheet, Modal, Platform, Dimensions, Image } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useAuth } from '../../contexts/AuthContext';
@@ -36,6 +36,7 @@ const STATUS_TABS = [
 export default function AdminOrders() {
   const { token } = useAuth();
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const [bookings, setBookings] = useState<any[]>([]);
   const [cccdInfo, setCccdInfo] = useState<any>(null);
   const [showQrScanner, setShowQrScanner] = useState(false);
@@ -595,7 +596,7 @@ export default function AdminOrders() {
       {/* QR Scanner Modal */}
       <Modal visible={showQrScanner} animationType="slide" onRequestClose={handleCloseQrScanner}>
         <View style={{ flex: 1, backgroundColor: colors.background }}>
-          <SafeAreaView style={{ flex: 1 }}>
+          <View style={{ flex: 1, paddingTop: Math.max(insets.top, Platform.OS === 'ios' ? 50 : 20) }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 12 }}>
               <Text style={{ color: colors.text, fontSize: 18, fontWeight: '700' }}>📷 Quét QR trên CCCD</Text>
               <TouchableOpacity onPress={handleCloseQrScanner}>
@@ -643,7 +644,7 @@ export default function AdminOrders() {
                 </TouchableOpacity>
               </View>
             </View>
-          </SafeAreaView>
+          </View>
         </View>
       </Modal>
     </SafeAreaView>

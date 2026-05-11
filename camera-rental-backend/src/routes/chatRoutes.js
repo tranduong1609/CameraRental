@@ -95,12 +95,12 @@ QUY TẮC:
 - Tư vấn thuê máy ảnh, lens, phụ kiện dựa trên nhu cầu (loại chụp, ngân sách, kinh nghiệm).
 - Trả lời cực kỳ ngắn gọn (dưới 3 câu).
 - Chỉ tập trung vào thông tin thuê máy.
-- Ngoài phạm vi → hướng dẫn gọi hotline 0888888888.
+- Ngoài phạm vi → hướng dẫn gọi hotline 0899259410.
 
 SẢN PHẨM:
 ${productList || 'Chưa có sản phẩm.'}
 
-DỊCH VỤ: Hotline 0888888888 (8h-22h), đặt cọc hoàn trả, phụ kiện miễn phí, giao nhận tận nơi.`;
+DỊCH VỤ: Hotline 0899259410 (8h-22h), đặt cọc hoàn trả, phụ kiện miễn phí, giao nhận tận nơi.`;
 
     const model = genAI.getGenerativeModel({
       model: 'gemini-3.1-flash-lite',

@@ -2,7 +2,50 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { adminApi } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
-import { Plus, Edit2, Trash2, Camera, X } from 'lucide-react';
+import { Plus, Edit2, Trash2, Camera, X, PlusCircle, CheckCircle, XCircle } from 'lucide-react';
+
+const COMMON_ACCESSORIES = [
+  'Pin chính hãng', 'Pin dự phòng', 'Sạc pin', 'Sạc USB-C',
+  'Túi máy', 'Dây đeo', 'Thẻ nhớ 64GB', 'Thẻ nhớ 128GB',
+  'Filter UV', 'Hood lens', 'Tripod', 'Remote shutter',
+  'Đầu đọc thẻ', 'Cáp truyền dữ liệu',
+];
+
+const SPEC_TEMPLATES: Record<string, { key: string; label: string }[]> = {
+  mirrorless: [
+    { key: 'sensor', label: 'Cảm biến' },
+    { key: 'resolution', label: 'Độ phân giải' },
+    { key: 'iso', label: 'ISO' },
+    { key: 'video', label: 'Video' },
+    { key: 'weight', label: 'Trọng lượng' },
+    { key: 'stabilization', label: 'Chống rung' },
+  ],
+  dslr: [
+    { key: 'sensor', label: 'Cảm biến' },
+    { key: 'resolution', label: 'Độ phân giải' },
+    { key: 'iso', label: 'ISO' },
+    { key: 'fps', label: 'Tốc độ chụp liên tiếp' },
+    { key: 'weight', label: 'Trọng lượng' },
+  ],
+  film: [
+    { key: 'film_format', label: 'Định dạng phim' },
+    { key: 'lens_mount', label: 'Ngàm ống kính' },
+    { key: 'shutter_speed', label: 'Tốc độ màn trập' },
+    { key: 'weight', label: 'Trọng lượng' },
+  ],
+  lens: [
+    { key: 'focal_length', label: 'Tiêu cự' },
+    { key: 'aperture', label: 'Khẩu độ' },
+    { key: 'lens_mount', label: 'Ngàm' },
+    { key: 'stabilization', label: 'Chống rung' },
+    { key: 'weight', label: 'Trọng lượng' },
+  ],
+  accessory: [
+    { key: 'type', label: 'Loại' },
+    { key: 'compatibility', label: 'Tương thích' },
+    { key: 'weight', label: 'Trọng lượng' },
+  ],
+};
 
 export default function AdminInventoryPage() {
   const { token } = useAuth();
@@ -17,9 +60,13 @@ export default function AdminInventoryPage() {
   const [formData, setFormData] = useState<any>({
     name: '', brand: '', category: 'mirrorless',
     price_per_day: '', deposit_amount: '', description: '', total_quantity: '1', available_quantity: '1',
-    included_items: ''
+    included_items: [] as string[],
+    specs: {} as Record<string, string>,
   });
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [accessoryInput, setAccessoryInput] = useState('');
+  const [specKeyInput, setSpecKeyInput] = useState('');
+  const [specValueInput, setSpecValueInput] = useState('');
 
   const fetchCameras = async () => {
     if (!token) return;
@@ -47,7 +94,8 @@ export default function AdminInventoryPage() {
         description: camera.description || '',
         total_quantity: camera.quantity || camera.total_quantity || '1',
         available_quantity: camera.available_quantity || '1',
-        included_items: camera.included_items && Array.isArray(camera.included_items) ? camera.included_items.join(', ') : '',
+        included_items: camera.included_items && Array.isArray(camera.included_items) ? camera.included_items : [],
+        specs: camera.specs || {},
         existing_images: camera.images || [],
       });
     } else {
@@ -55,11 +103,15 @@ export default function AdminInventoryPage() {
       setFormData({
         name: '', brand: '', category: 'mirrorless',
         price_per_day: '', deposit_amount: '', description: '', total_quantity: '1', available_quantity: '1',
-        included_items: '',
+        included_items: [] as string[],
+        specs: {} as Record<string, string>,
         existing_images: [],
       });
     }
     setSelectedFiles([]);
+    setAccessoryInput('');
+    setSpecKeyInput('');
+    setSpecValueInput('');
     setShowModal(true);
   };
 
@@ -72,9 +124,10 @@ export default function AdminInventoryPage() {
       ...formData,
       price_per_day: Number(formData.price_per_day),
       deposit_amount: Number(formData.deposit_amount),
-      quantity: Number(formData.total_quantity), // backend expects quantity
+      quantity: Number(formData.total_quantity),
       available_quantity: Number(formData.available_quantity),
-      included_items: formData.included_items ? formData.included_items.split(',').map((i: string) => i.trim()).filter(Boolean) : [],
+      included_items: formData.included_items || [],
+      specs: formData.specs && Object.keys(formData.specs).length > 0 ? formData.specs : undefined,
       existing_images: formData.existing_images || [],
     };
 
@@ -254,10 +307,129 @@ export default function AdminInventoryPage() {
                   <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8, display: 'block' }}>SẴN CÓ</label>
                   <input type="number" value={formData.available_quantity} onChange={e => setFormData({ ...formData, available_quantity: e.target.value })} style={{ width: '100%', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text)' }} />
                 </div>
+                {/* ── THÔNG SỐ KỸ THUẬT ── */}
                 <div style={{ gridColumn: '1 / -1' }}>
-                  <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8, display: 'block' }}>PHỤ KIỆN ĐI KÈM (Cách nhau bằng dấu phẩy)</label>
-                  <input type="text" placeholder="VD: Pin, Sạc, Thẻ nhớ 64GB, Túi đựng" value={formData.included_items} onChange={e => setFormData({ ...formData, included_items: e.target.value })} style={{ width: '100%', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text)' }} />
+                  <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 12, display: 'block' }}>THÔNG SỐ KỸ THUẬT</label>
+                  {(SPEC_TEMPLATES[formData.category] || []).map((spec) => (
+                    <div key={spec.key} style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+                      <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-muted)', width: 130, flexShrink: 0 }}>{spec.label}</label>
+                      <input
+                        type="text"
+                        value={formData.specs?.[spec.key] || ''}
+                        onChange={e => setFormData({ ...formData, specs: { ...formData.specs, [spec.key]: e.target.value } })}
+                        placeholder={`Nhập ${spec.label.toLowerCase()}...`}
+                        style={{ flex: 1, padding: '8px 12px', borderRadius: 8, border: '1px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text)', fontSize: 13 }}
+                      />
+                    </div>
+                  ))}
+                  {/* Custom specs already added */}
+                  {Object.entries(formData.specs || {})
+                    .filter(([key]) => !(SPEC_TEMPLATES[formData.category] || []).some(s => s.key === key))
+                    .filter(([, val]) => val)
+                    .map(([key, val]) => (
+                      <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-muted)', width: 130, flexShrink: 0 }}>{key}</span>
+                        <span style={{ flex: 1, fontSize: 13, color: 'var(--text)' }}>{val as string}</span>
+                        <button onClick={() => {
+                          const updated = { ...formData.specs };
+                          delete updated[key];
+                          setFormData({ ...formData, specs: updated });
+                        }} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', display: 'flex', padding: 2 }}>
+                          <XCircle size={16} />
+                        </button>
+                      </div>
+                    ))}
+                  {/* Add custom spec */}
+                  <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+                    <input type="text" value={specKeyInput} onChange={e => setSpecKeyInput(e.target.value)} placeholder="Tên thông số" style={{ flex: 1, padding: '8px 12px', borderRadius: 8, border: '1px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text)', fontSize: 13 }} />
+                    <input type="text" value={specValueInput} onChange={e => setSpecValueInput(e.target.value)} placeholder="Giá trị" style={{ flex: 1, padding: '8px 12px', borderRadius: 8, border: '1px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text)', fontSize: 13 }} />
+                    <button onClick={() => {
+                      const k = specKeyInput.trim();
+                      const v = specValueInput.trim();
+                      if (k && v) {
+                        setFormData({ ...formData, specs: { ...formData.specs, [k]: v } });
+                        setSpecKeyInput('');
+                        setSpecValueInput('');
+                      }
+                    }} style={{ padding: '8px 14px', borderRadius: 8, background: 'var(--primary)', color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap' }}>
+                      <Plus size={14} /> Thêm
+                    </button>
+                  </div>
                 </div>
+
+                {/* ── PHỤ KIỆN ĐI KÈM ── */}
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 12, display: 'block' }}>PHỤ KIỆN ĐI KÈM</label>
+                  {/* Predefined options */}
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
+                    {COMMON_ACCESSORIES.map((acc) => {
+                      const isSelected = formData.included_items?.includes(acc);
+                      return (
+                        <button
+                          key={acc}
+                          type="button"
+                          onClick={() => {
+                            if (isSelected) {
+                              setFormData({ ...formData, included_items: formData.included_items.filter((i: string) => i !== acc) });
+                            } else {
+                              setFormData({ ...formData, included_items: [...(formData.included_items || []), acc] });
+                            }
+                          }}
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: 5,
+                            padding: '5px 10px', borderRadius: 8, fontSize: 12, fontWeight: isSelected ? 600 : 400, cursor: 'pointer',
+                            background: isSelected ? 'var(--primary-light, rgba(139, 92, 246, 0.1))' : 'var(--surface-high)',
+                            color: isSelected ? 'var(--primary)' : 'var(--text)',
+                            border: `1px solid ${isSelected ? 'var(--primary)' : 'var(--input-border)'}`,
+                          }}
+                        >
+                          {isSelected ? <CheckCircle size={13} /> : <PlusCircle size={13} />}
+                          {acc}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {/* Custom accessory input */}
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <input type="text" value={accessoryInput} onChange={e => setAccessoryInput(e.target.value)} placeholder="Thêm phụ kiện khác..."
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          const trimmed = accessoryInput.trim();
+                          if (trimmed && !formData.included_items?.includes(trimmed)) {
+                            setFormData({ ...formData, included_items: [...(formData.included_items || []), trimmed] });
+                            setAccessoryInput('');
+                          }
+                        }
+                      }}
+                      style={{ flex: 1, padding: '8px 12px', borderRadius: 8, border: '1px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text)', fontSize: 13 }} />
+                    <button type="button" onClick={() => {
+                      const trimmed = accessoryInput.trim();
+                      if (trimmed && !formData.included_items?.includes(trimmed)) {
+                        setFormData({ ...formData, included_items: [...(formData.included_items || []), trimmed] });
+                        setAccessoryInput('');
+                      }
+                    }} style={{ padding: '8px 14px', borderRadius: 8, background: 'var(--primary)', color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap' }}>
+                      <Plus size={14} /> Thêm
+                    </button>
+                  </div>
+                  {/* Custom items (not in COMMON list) */}
+                  {formData.included_items?.filter((item: string) => !COMMON_ACCESSORIES.includes(item)).length > 0 && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
+                      {formData.included_items.filter((item: string) => !COMMON_ACCESSORIES.includes(item)).map((item: string) => (
+                        <span key={item} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 8, fontSize: 12, fontWeight: 600, background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                          <CheckCircle size={12} />
+                          {item}
+                          <button type="button" onClick={() => setFormData({ ...formData, included_items: formData.included_items.filter((i: string) => i !== item) })} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', display: 'flex', padding: 0, marginLeft: 2 }}>
+                            <XCircle size={14} />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* ── MÔ TẢ ── */}
                 <div style={{ gridColumn: '1 / -1' }}>
                   <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8, display: 'block' }}>MÔ TẢ</label>
                   <textarea rows={3} value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} style={{ width: '100%', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text)', resize: 'none' }} />

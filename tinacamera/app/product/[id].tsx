@@ -221,7 +221,10 @@ export default function ProductDetailsScreen() {
     );
   }
 
-  const store = camera.store_id;
+  const store = camera.store_id || {
+    name: 'Tina Camera',
+    address: 'Thanh Xuân, Hà Nội',
+  };
   const specs = camera.specs || {};
 
   return (
