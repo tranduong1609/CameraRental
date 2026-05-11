@@ -266,7 +266,7 @@ router.get('/equipment-stats', async (req, res) => {
       return acc;
     }, {});
 
-    const categoryArray = Object.values(categoryStats).sort((a: any, b: any) => b.count - a.count);
+    const categoryArray = Object.values(categoryStats).sort((a, b) => b.count - a.count);
 
     // Summary
     const totalEquipment = await Camera.countDocuments();

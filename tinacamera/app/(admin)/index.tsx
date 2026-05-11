@@ -434,7 +434,7 @@ export default function AdminDashboard() {
                       if (item.id === 'custom') {
                         setCalendarMode(true);
                       } else {
-                        setRevenuePeriod(item.id as RevenuePeriod);
+                        setRevenuePeriod(item.id);
                         setShowPeriodModal(false);
                       }
                     }}
