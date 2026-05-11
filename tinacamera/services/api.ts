@@ -268,10 +268,11 @@ export const bookingApi = {
       body: JSON.stringify(data),
     }),
 
-  cancelBooking: (token: string, id: string) =>
+  cancelBooking: (token: string, id: string, reason?: string) =>
     request<{ booking: any; message: string }>(`/bookings/${id}/cancel`, {
       method: 'PUT',
       headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ reason }),
     }),
 
   submitReview: (token: string, bookingId: string, rating: number, comment?: string) =>
@@ -291,7 +292,7 @@ export const adminApi = {
       headers: { Authorization: `Bearer ${token}` },
     }),
 
-  getRevenue: (token: string, period: 'all' | 'day' | 'week' | 'month' | 'custom' = 'day', startDate?: string, endDate?: string) => {
+  getRevenue: (token: string, period: string = 'day', startDate?: string, endDate?: string) => {
     let url = `/admin/revenue?period=${period}`;
     if (period === 'custom' && startDate) url += `&start_date=${startDate}`;
     if (period === 'custom' && endDate) url += `&end_date=${endDate}`;
@@ -469,11 +470,5 @@ export const notificationApi = {
       method: 'PUT',
       headers: { Authorization: `Bearer ${token}` },
     }),
-
-  savePushToken: (token: string, pushToken: string) =>
-    request<{ message: string; ok: boolean }>('/notifications/token', {
-      method: 'PUT',
-      headers: { Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ token: pushToken }),
-    }),
 };
+

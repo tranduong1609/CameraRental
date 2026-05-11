@@ -117,6 +117,10 @@ export default function LoginScreen() {
       Alert.alert('Lỗi', 'Vui lòng nhập email và mật khẩu.');
       return;
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      Alert.alert('Lỗi', 'Email không đúng định dạng.');
+      return;
+    }
 
     setLoading(true);
     const result = await authApi.login(email, password);

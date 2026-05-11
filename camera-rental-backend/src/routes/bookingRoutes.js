@@ -210,13 +210,44 @@ router.put('/:id/cancel', authMiddleware, async (req, res) => {
     if (!booking) {
       return res.status(404).json({ message: 'Không tìm thấy đơn hàng.' });
     }
-    if (booking.status !== 'pending') {
-      return res.status(400).json({ message: 'Chỉ có thể huỷ đơn hàng đang chờ thanh toán.' });
+    
+    // Chỉ cho phép huỷ nếu chưa nhận máy (status: pending, paid, verified)
+    const allowedStatuses = ['pending', 'paid', 'verified'];
+    if (!allowedStatuses.includes(booking.status)) {
+      return res.status(400).json({ message: 'Không thể huỷ đơn hàng ở trạng thái này.' });
     }
 
+    const now = new Date();
+    const createdAt = new Date(booking.createdAt);
+    const startDate = new Date(booking.start_date);
+
+    const diffFromCreation = (now - createdAt) / (1000 * 60 * 60); // hours
+    const diffToStart = (startDate - now) / (1000 * 60 * 60 * 24); // days
+
+    let refundPercent = 0;
+    if (booking.status === 'pending') {
+      refundPercent = 0; // Chưa trả tiền thì không cần hoàn
+    } else {
+      // Logic hoàn tiền cho đơn đã thanh toán
+      if (diffFromCreation <= 2) {
+        refundPercent = 100; // Trong 2h đầu: hoàn 100%
+      } else if (diffToStart >= 3) {
+        refundPercent = 50;  // Trước 3 ngày: hoàn 50%
+      } else if (diffToStart < 1) {
+        refundPercent = 0;   // Trong vòng 24h: không hoàn
+      } else {
+        refundPercent = 25;  // Khoảng giữa (1-3 ngày): hoàn 25% (mặc định)
+      }
+    }
+
+    const refundAmount = Math.round((booking.paid_amount || 0) * (refundPercent / 100));
+
     booking.status = 'cancelled';
-    booking.cancelled_at = new Date();
-    booking.cancel_reason = 'Khách hàng tự huỷ';
+    booking.cancelled_at = now;
+    booking.cancel_reason = req.body.reason || 'Khách hàng tự huỷ';
+    booking.refund_percent = refundPercent;
+    booking.refund_amount = refundAmount;
+
     await booking.save();
 
     // Release camera availability if needed

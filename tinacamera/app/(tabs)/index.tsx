@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Image, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { cameraApi } from '../../services/api';
 import { useRental } from '../../contexts/RentalContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -34,6 +34,7 @@ function formatDisplayDate(dateStr: string) {
 
 export default function HomeScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ openCalendar?: string }>();
   const { startDate, endDate, totalDays, setDates } = useRental();
   const { colors, isDark } = useTheme();
   const [categories, setCategories] = useState<any[]>([]);
@@ -43,6 +44,13 @@ export default function HomeScreen() {
   const [tempStart, setTempStart] = useState<string | null>(null);
   const [tempEnd, setTempEnd] = useState<string | null>(null);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
+
+  // Tự động mở calendar khi được chuyển từ trang khác với param openCalendar
+  useEffect(() => {
+    if (params.openCalendar === 'true' && !startDate) {
+      openCalendar();
+    }
+  }, [params.openCalendar]);
 
   useEffect(() => {
     loadData();
@@ -218,11 +226,26 @@ export default function HomeScreen() {
           <View style={{ flexDirection: 'row', marginTop: 20, gap: 12 }}>
             <TouchableOpacity
               style={{ backgroundColor: colors.buttonPrimary, paddingHorizontal: 20, paddingVertical: 12, borderRadius: 16 }}
-              onPress={() => router.push('/(tabs)/category')}
+              onPress={() => {
+                if (!startDate || !endDate) {
+                  openCalendar();
+                } else {
+                  router.push('/(tabs)/category');
+                }
+              }}
             >
               <Text style={{ color: colors.buttonPrimaryText, fontWeight: '700', fontSize: 14 }}>Thuê ngay</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={{ backgroundColor: colors.surfaceContainerHigh, paddingHorizontal: 20, paddingVertical: 12, borderRadius: 16, borderWidth: 1, borderColor: colors.separator }}>
+            <TouchableOpacity
+              style={{ backgroundColor: colors.surfaceContainerHigh, paddingHorizontal: 20, paddingVertical: 12, borderRadius: 16, borderWidth: 1, borderColor: colors.separator }}
+              onPress={() => {
+                if (!startDate || !endDate) {
+                  openCalendar();
+                } else {
+                  router.push('/(tabs)/category');
+                }
+              }}
+            >
               <Text style={{ color: colors.text, fontWeight: '600', fontSize: 14 }}>Xem thiết bị</Text>
             </TouchableOpacity>
           </View>

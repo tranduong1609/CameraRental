@@ -40,15 +40,15 @@ interface Booking {
 }
 
 const STATUS_MAP: Record<string, { label: string; color: string; bgColor: string; icon: string }> = {
-  pending:    { label: 'Chờ thanh toán', color: '#FBBF24', bgColor: 'rgba(251,191,36,0.1)',  icon: 'time' },
-  paid:       { label: 'Đã thanh toán',  color: '#3B82F6', bgColor: 'rgba(59,130,246,0.1)',  icon: 'card' },
-  verified:   { label: 'Đã xác minh',    color: '#8B5CF6', bgColor: 'rgba(139,92,246,0.1)',  icon: 'shield-checkmark' },
-  active:     { label: 'Đang thuê',      color: '#10B981', bgColor: 'rgba(16,185,129,0.1)',  icon: 'camera' },
-  overdue:    { label: 'Quá hạn trả máy', color: '#EF4444', bgColor: 'rgba(239,68,68,0.12)',  icon: 'alert-circle' },
-  returned:   { label: 'Đã trả máy',     color: '#6366F1', bgColor: 'rgba(99,102,241,0.1)',  icon: 'checkmark-done' },
-  completed:  { label: 'Hoàn tất',       color: '#10B981', bgColor: 'rgba(16,185,129,0.1)',  icon: 'checkmark-circle' },
-  cancelled:  { label: 'Đã hủy',         color: '#EF4444', bgColor: 'rgba(239,68,68,0.1)',   icon: 'close-circle' },
-  refunded:   { label: 'Đã hoàn tiền',   color: '#F97316', bgColor: 'rgba(249,115,22,0.1)',  icon: 'return-down-back' },
+  pending: { label: 'Chờ thanh toán', color: '#FBBF24', bgColor: 'rgba(251,191,36,0.1)', icon: 'time' },
+  paid: { label: 'Đã thanh toán', color: '#3B82F6', bgColor: 'rgba(59,130,246,0.1)', icon: 'card' },
+  verified: { label: 'Đã xác minh', color: '#8B5CF6', bgColor: 'rgba(139,92,246,0.1)', icon: 'shield-checkmark' },
+  active: { label: 'Đang thuê', color: '#10B981', bgColor: 'rgba(16,185,129,0.1)', icon: 'camera' },
+  overdue: { label: 'Quá hạn trả máy', color: '#EF4444', bgColor: 'rgba(239,68,68,0.12)', icon: 'alert-circle' },
+  returned: { label: 'Đã trả máy', color: '#6366F1', bgColor: 'rgba(99,102,241,0.1)', icon: 'checkmark-done' },
+  completed: { label: 'Hoàn tất', color: '#10B981', bgColor: 'rgba(16,185,129,0.1)', icon: 'checkmark-circle' },
+  cancelled: { label: 'Đã hủy', color: '#EF4444', bgColor: 'rgba(239,68,68,0.1)', icon: 'close-circle' },
+  refunded: { label: 'Đã hoàn tiền', color: '#F97316', bgColor: 'rgba(249,115,22,0.1)', icon: 'return-down-back' },
 };
 
 function formatDate(dateStr: string) {
@@ -58,6 +58,33 @@ function formatDate(dateStr: string) {
 
 function formatCurrency(amount: number) {
   return amount.toLocaleString('vi-VN') + 'đ';
+}
+
+function calculateRefund(booking: Booking) {
+  if (booking.status === 'pending') return { percent: 0, amount: 0 };
+
+  const now = new Date();
+  const createdAt = new Date(booking.createdAt);
+  const startDate = new Date(booking.start_date);
+
+  const diffFromCreation = (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60); // hours
+  const diffToStart = (startDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24); // days
+
+  let percent = 0;
+  if (diffFromCreation <= 2) {
+    percent = 100;
+  } else if (diffToStart >= 3) {
+    percent = 50;
+  } else if (diffToStart < 1) {
+    percent = 0;
+  } else {
+    percent = 25; // 1-3 days
+  }
+
+  return {
+    percent,
+    amount: Math.round((booking.paid_amount || 0) * (percent / 100))
+  };
 }
 
 export default function OrdersScreen() {
@@ -127,20 +154,34 @@ export default function OrdersScreen() {
   };
 
   const handleCancelBooking = (booking: Booking) => {
+    const refund = calculateRefund(booking);
+
+    let message = `Bạn có chắc chắn muốn huỷ đơn hàng ${booking.booking_code} không?`;
+    if (booking.status !== 'pending' && booking.paid_amount > 0) {
+      message += `\n\n💰 Tiền hoàn lại dự kiến: ${formatCurrency(refund.amount)} (${refund.percent}%).`;
+      if (refund.percent < 100) {
+        message += `\n(Khấu trừ phí hủy theo quy định)`;
+      }
+    }
+
     Alert.alert(
       'Xác nhận huỷ đơn',
-      `Bạn có chắc chắn muốn huỷ đơn hàng ${booking.booking_code} không?`,
+      message,
       [
-        { text: 'Không', style: 'cancel' },
+        { text: 'Quay lại', style: 'cancel' },
         {
-          text: 'Có, Huỷ đơn',
+          text: 'Xác nhận Huỷ',
           style: 'destructive',
           onPress: async () => {
             setLoading(true);
             try {
-              const res = await bookingApi.cancelBooking(token!, booking._id);
+              const res = await bookingApi.cancelBooking(token!, booking._id, 'Khách hàng tự huỷ');
               if (res.ok) {
-                Alert.alert('Thành công', 'Đã huỷ đơn hàng thành công.');
+                let successMsg = 'Đã huỷ đơn hàng thành công.';
+                if (booking.paid_amount > 0) {
+                  successMsg += '\n\n📞 Vui lòng liên hệ Hotline 0899259410 để được hỗ trợ nhận lại tiền hoàn.';
+                }
+                Alert.alert('Thành công', successMsg);
                 fetchBookings();
               } else {
                 Alert.alert('Lỗi', res.message || 'Không thể huỷ đơn hàng.');
@@ -365,9 +406,9 @@ export default function OrdersScreen() {
                 <Text style={{ color: colors.textMuted, fontSize: 12 }}>
                   Đặt lúc {formatDate(booking.createdAt)}
                 </Text>
-                
-                {/* Actions for Pending Booking */}
-                {booking.status === 'pending' && (
+
+                {/* Actions for Pending/Paid/Verified Booking */}
+                {['pending', 'paid', 'verified'].includes(booking.status) && (
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                     <TouchableOpacity
                       style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999, borderWidth: 1, borderColor: colors.separator }}
@@ -375,12 +416,14 @@ export default function OrdersScreen() {
                     >
                       <Text style={{ color: colors.textSecondary, fontSize: 12, fontWeight: '600' }}>Huỷ đơn</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity
-                      style={{ backgroundColor: colors.buttonPrimary, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999 }}
-                      onPress={() => handleResumePayment(booking)}
-                    >
-                      <Text style={{ color: colors.buttonPrimaryText, fontSize: 12, fontWeight: '700' }}>Thanh toán</Text>
-                    </TouchableOpacity>
+                    {booking.status === 'pending' && (
+                      <TouchableOpacity
+                        style={{ backgroundColor: colors.buttonPrimary, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999 }}
+                        onPress={() => handleResumePayment(booking)}
+                      >
+                        <Text style={{ color: colors.buttonPrimaryText, fontSize: 12, fontWeight: '700' }}>Thanh toán</Text>
+                      </TouchableOpacity>
+                    )}
                   </View>
                 )}
 
@@ -404,6 +447,20 @@ export default function OrdersScreen() {
             </View>
           );
         })}
+
+        {/* Cancellation Policy Note */}
+        <View style={{ marginTop: 20, padding: 16, backgroundColor: colors.surfaceContainerHigh + '60', borderRadius: 16, borderStyle: 'dashed', borderWidth: 1, borderColor: colors.separator }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+            <Ionicons name="information-circle" size={18} color={colors.accentPink} />
+            <Text style={{ color: colors.text, fontWeight: '700', fontSize: 14, marginLeft: 8 }}>Chính sách hủy đơn & Hoàn tiền</Text>
+          </View>
+          <Text style={{ color: colors.textSecondary, fontSize: 12, lineHeight: 18 }}>
+            • Hoàn <Text style={{ fontWeight: '700' }}>100%</Text> nếu hủy trong vòng 2 giờ sau khi đặt.{"\n"}
+            • Hoàn <Text style={{ fontWeight: '700' }}>50%</Text> nếu hủy trước ngày nhận máy ≥ 3 ngày.{"\n"}
+            • <Text style={{ fontWeight: '700' }}>Không hoàn tiền</Text> nếu hủy trong vòng 24h trước giờ nhận máy.{"\n"}
+            • Vui lòng liên hệ Hotline <Text style={{ color: colors.accentPink, fontWeight: '700' }}>0888888888</Text> để được hỗ trợ.
+          </Text>
+        </View>
       </ScrollView>
 
       {/* Review Modal */}

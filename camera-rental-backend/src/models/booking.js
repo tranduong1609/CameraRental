@@ -139,6 +139,14 @@ const BookingSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    refund_amount: {
+      type: Number,
+      default: 0,
+    },
+    refund_percent: {
+      type: Number,
+      default: 0,
+    },
     pickup_reminded: {
       type: Boolean,
       default: false,

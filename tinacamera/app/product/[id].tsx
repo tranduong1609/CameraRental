@@ -70,10 +70,7 @@ export default function ProductDetailsScreen() {
   const handleAddToCart = () => {
     if (!camera) return;
     if (!startDate) {
-      Alert.alert('Chưa chọn ngày thuê', 'Vui lòng quay lại Trang chủ để chọn khoảng thời gian thuê thiết bị trước khi thêm vào giỏ hàng.', [
-        { text: 'Hủy', style: 'cancel' },
-        { text: 'Về Trang chủ', onPress: () => router.push('/(tabs)') }
-      ]);
+      router.push({ pathname: '/(tabs)', params: { openCalendar: 'true' } });
       return;
     }
     const availQty = camera.dynamic_available_quantity ?? camera.available_quantity ?? 1;
@@ -93,10 +90,7 @@ export default function ProductDetailsScreen() {
   const handleBuyNow = () => {
     if (!camera) return;
     if (!startDate) {
-      Alert.alert('Chưa chọn ngày thuê', 'Vui lòng quay lại Trang chủ để chọn khoảng thời gian thuê thiết bị trước.', [
-        { text: 'Hủy', style: 'cancel' },
-        { text: 'Về Trang chủ', onPress: () => router.push('/(tabs)') }
-      ]);
+      router.push({ pathname: '/(tabs)', params: { openCalendar: 'true' } });
       return;
     }
     const availQty = camera.dynamic_available_quantity ?? camera.available_quantity ?? 1;

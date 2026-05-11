@@ -47,10 +47,15 @@ router.get('/stats', async (req, res) => {
       Booking.countDocuments({ status: { $in: ['paid', 'verified', 'active', 'returned', 'completed'] } }),
     ]);
 
-    // Tính tổng doanh thu từ các đơn đã thanh toán
+    // Tính tổng doanh thu từ các đơn (Net Revenue = paid_amount - refund_amount)
     const revenueResult = await Booking.aggregate([
-      { $match: { status: { $in: ['paid', 'verified', 'active', 'returned', 'completed'] } } },
-      { $group: { _id: null, total: { $sum: '$paid_amount' } } },
+      { $match: { status: { $in: ['paid', 'verified', 'active', 'returned', 'completed', 'cancelled', 'refunded'] } } },
+      { 
+        $group: { 
+          _id: null, 
+          total: { $sum: { $subtract: [{ $ifNull: ['$paid_amount', 0] }, { $ifNull: ['$refund_amount', 0] }] } } 
+        } 
+      },
     ]);
     const totalRevenue = revenueResult[0]?.total || 0;
 
@@ -87,34 +92,44 @@ router.get('/revenue', async (req, res) => {
     const now = new Date();
     let groupFormat, startDate;
 
-    if (period === 'day') {
+    const monthMatch = period.match(/^month(\d+)$/);
+    if (period === 'today') {
+      startDate = new Date(now);
+      startDate.setHours(0, 0, 0, 0);
+      groupFormat = { $dateToString: { format: '%H:00', date: '$createdAt', timezone: '+07:00' } };
+    } else if (period === 'month_current') {
+      startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+      startDate.setHours(0, 0, 0, 0);
+      groupFormat = { $dateToString: { format: '%Y-%m-%d', date: '$createdAt', timezone: '+07:00' } };
+    } else if (period === 'day') {
       startDate = new Date(now);
       startDate.setDate(startDate.getDate() - 6);
       startDate.setHours(0, 0, 0, 0);
-      groupFormat = { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } };
+      groupFormat = { $dateToString: { format: '%Y-%m-%d', date: '$createdAt', timezone: '+07:00' } };
     } else if (period === 'week') {
       startDate = new Date(now);
       startDate.setDate(startDate.getDate() - 55);
       startDate.setHours(0, 0, 0, 0);
-      groupFormat = { $dateToString: { format: '%Y-W%V', date: '$createdAt' } };
-    } else if (period === 'month') {
-      startDate = new Date(now);
-      startDate.setMonth(startDate.getMonth() - 5);
-      startDate.setDate(1);
+      groupFormat = { $dateToString: { format: '%Y-W%V', date: '$createdAt', timezone: '+07:00' } };
+    } else if (monthMatch || period === 'month') {
+      const months = monthMatch ? parseInt(monthMatch[1], 10) : 6;
+      startDate = new Date(now.getFullYear(), now.getMonth() - months + 1, 1);
       startDate.setHours(0, 0, 0, 0);
-      groupFormat = { $dateToString: { format: '%Y-%m', date: '$createdAt' } };
+      groupFormat = { $dateToString: { format: '%Y-%m', date: '$createdAt', timezone: '+07:00' } };
     } else if (period === 'all') {
       // Toàn bộ thời gian, group theo tháng
       startDate = null;
-      groupFormat = { $dateToString: { format: '%Y-%m', date: '$createdAt' } };
+      groupFormat = { $dateToString: { format: '%Y-%m', date: '$createdAt', timezone: '+07:00' } };
     } else if (period === 'custom') {
       startDate = start_date ? new Date(start_date) : new Date(now);
       startDate.setHours(0, 0, 0, 0);
-      groupFormat = { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } };
+      groupFormat = { $dateToString: { format: '%Y-%m-%d', date: '$createdAt', timezone: '+07:00' } };
+    } else {
+      groupFormat = { $dateToString: { format: '%Y-%m', date: '$createdAt', timezone: '+07:00' } };
     }
 
     const matchCondition = {
-      status: { $in: ['paid', 'verified', 'active', 'returned', 'completed'] },
+      status: { $in: ['paid', 'verified', 'active', 'returned', 'completed', 'cancelled', 'refunded'] },
     };
     if (startDate) {
       matchCondition.createdAt = { $gte: startDate };
@@ -135,8 +150,28 @@ router.get('/revenue', async (req, res) => {
       {
         $group: {
           _id: groupFormat,
-          revenue: { $sum: '$paid_amount' },
-          count: { $sum: 1 },
+          revenue: { 
+            $sum: { 
+              $subtract: [
+                { $ifNull: ['$paid_amount', 0] }, 
+                { $ifNull: ['$refund_amount', 0] }
+              ] 
+            } 
+          },
+          count: { 
+            $sum: { 
+              $cond: [
+                { 
+                  $gt: [
+                    { $subtract: [{ $ifNull: ['$paid_amount', 0] }, { $ifNull: ['$refund_amount', 0] }] }, 
+                    0
+                  ] 
+                }, 
+                1, 
+                { $cond: [{ $eq: ['$status', 'cancelled'] }, 0, 1] }
+              ]
+            } 
+          },
         },
       },
       { $sort: { _id: 1 } },
@@ -148,8 +183,8 @@ router.get('/revenue', async (req, res) => {
 
     // Tổng doanh thu tất cả thời gian
     const allTimeResult = await Booking.aggregate([
-      { $match: { status: { $in: ['paid', 'verified', 'active', 'returned', 'completed'] } } },
-      { $group: { _id: null, total: { $sum: '$paid_amount' }, count: { $sum: 1 } } },
+      { $match: { status: { $in: ['paid', 'verified', 'active', 'returned', 'completed', 'cancelled', 'refunded'] } } },
+      { $group: { _id: null, total: { $sum: { $subtract: ['$paid_amount', { $ifNull: ['$refund_amount', 0] }] } }, count: { $sum: 1 } } },
     ]);
 
     res.json({

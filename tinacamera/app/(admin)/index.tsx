@@ -37,8 +37,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  type RevenuePeriod = 'all' | 'day' | 'week' | 'month' | 'custom';
-  const [revenuePeriod, setRevenuePeriod] = useState<RevenuePeriod>('all');
+  const [revenuePeriod, setRevenuePeriod] = useState<string>('month_current');
   const [periodRevenue, setPeriodRevenue] = useState<{amount: number, count: number} | null>(null);
   const [showPeriodModal, setShowPeriodModal] = useState(false);
   const [calendarMode, setCalendarMode] = useState(false);
@@ -109,10 +108,6 @@ export default function AdminDashboard() {
   useEffect(() => { fetchData(); }, [fetchData]);
 
   useEffect(() => {
-    if (revenuePeriod === 'all') {
-      setPeriodRevenue(null);
-      return;
-    }
     if (revenuePeriod === 'custom' && (!customStartDate || !customEndDate)) {
       return;
     }
@@ -237,16 +232,16 @@ export default function AdminDashboard() {
           <View style={s.revenueInner}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
               <Text style={s.revenueLabel}>
-                {revenuePeriod === 'all' ? 'Tổng doanh thu (Toàn thời gian)' : 
-                 revenuePeriod === 'day' ? 'Doanh thu (7 ngày qua)' :
-                 revenuePeriod === 'week' ? 'Doanh thu (8 tuần qua)' :
-                 revenuePeriod === 'month' ? 'Doanh thu (6 tháng qua)' :
-                 `Doanh thu (${customStartDate} đến ${customEndDate})`}
+                {revenuePeriod === 'today' ? 'Doanh thu (Hôm nay)' : 
+                 revenuePeriod === 'month_current' ? 'Doanh thu (Tháng này)' :
+                 revenuePeriod === 'month3' ? 'Doanh thu (3 tháng qua)' :
+                 revenuePeriod === 'custom' ? `Doanh thu (${customStartDate} đến ${customEndDate})` :
+                 'Doanh thu'}
               </Text>
               <Ionicons name="chevron-down" size={16} color={colors.textSecondary} />
             </View>
-            <Text style={s.revenueAmount}>{formatCurrency(periodRevenue ? periodRevenue.amount : (stats?.totalRevenue || 0))}</Text>
-            <Text style={s.revenueSub}>Từ {periodRevenue ? periodRevenue.count : (stats?.totalBookings || 0)} đơn hàng</Text>
+            <Text style={s.revenueAmount}>{formatCurrency(periodRevenue ? periodRevenue.amount : 0)}</Text>
+            <Text style={s.revenueSub}>Từ {periodRevenue ? periodRevenue.count : 0} đơn hàng</Text>
           </View>
         </TouchableOpacity>
 
@@ -342,10 +337,9 @@ export default function AdminDashboard() {
             ) : (
               <View>
                 {[
-                  { id: 'all', label: 'Toàn thời gian' },
-                  { id: 'day', label: '7 ngày qua' },
-                  { id: 'week', label: '8 tuần qua' },
-                  { id: 'month', label: '6 tháng qua' },
+                  { id: 'today', label: 'Hôm nay' },
+                  { id: 'month_current', label: 'Tháng này' },
+                  { id: 'month3', label: '3 tháng gần đây' },
                   { id: 'custom', label: 'Tùy chỉnh (Chọn khoảng thời gian)' },
                 ].map((item) => (
                   <TouchableOpacity

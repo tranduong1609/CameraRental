@@ -29,6 +29,8 @@ export default function ProfilePage() {
 
   const handleSave = async () => {
     if (!fullName.trim()) { showToast('Vui lòng nhập họ tên', 'error'); return; }
+    if (phone.trim() && !/^(0[3-9][0-9]{8})$/.test(phone.trim())) { showToast('SĐT không hợp lệ (VD: 0899259410)', 'error'); return; }
+    if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) { showToast('Email không đúng định dạng', 'error'); return; }
 
     setSaving(true);
     const res = await updateUser({

@@ -25,8 +25,12 @@ export default function OnboardingScreen() {
       Alert.alert('Lỗi', 'Vui lòng nhập số điện thoại.');
       return;
     }
-    if (!/^(0[0-9]{9,10})$/.test(phone.trim())) {
+    if (!/^(0[3-9][0-9]{8})$/.test(phone.trim())) {
       Alert.alert('Lỗi', 'Số điện thoại không hợp lệ (VD: 0899259410).');
+      return;
+    }
+    if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      Alert.alert('Lỗi', 'Email không đúng định dạng (VD: name@example.com).');
       return;
     }
 

@@ -85,18 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(newUser);
       }
       
-      // Request Push Token sau khi login thành công
-      import('../utils/registerForPushNotificationsAsync').then(module => {
-        module.registerForPushNotificationsAsync().then(pushToken => {
-          if (pushToken) {
-            import('../services/api').then(api => {
-              api.notificationApi.savePushToken(newToken, pushToken).catch(err => {
-                console.log('Unable to save push token to server', err);
-              });
-            });
-          }
-        });
-      });
+
 
     } catch (error) {
       console.error('Lỗi khi lưu token:', error);

@@ -139,12 +139,16 @@ export default function OrdersPage() {
   const confirmCancel = async () => {
     if (!cancelBooking || !token) return;
     setCancelLoading(true);
-    const res = await bookingApi.cancelBooking(token, cancelBooking._id);
+    const res = await bookingApi.cancelBooking(token, cancelBooking._id, 'Khách hàng tự hủy');
     setCancelLoading(false);
     if (res.ok) {
       setBookings(prev => prev.map(b => b._id === cancelBooking._id ? { ...b, status: 'cancelled' } : b));
       setCancelBooking(null);
-      showToast('Đã hủy đơn thành công');
+      let msg = 'Đã hủy đơn thành công';
+      if (cancelBooking.paid_amount > 0) {
+        msg += '. Vui lòng liên hệ Hotline 0888888888 để được hỗ trợ hoàn tiền.';
+      }
+      showToast(msg);
     } else {
       showToast(res.message || 'Hủy đơn thất bại');
     }
@@ -215,16 +219,18 @@ export default function OrdersPage() {
 
                     {/* ── Action buttons ── */}
                     <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
-                      {/* Pending: Pay + Cancel */}
-                      {b.status === 'pending' && (
+                      {/* Pending/Paid/Verified: Cancel button */}
+                      {['pending', 'paid', 'verified'].includes(b.status) && (
                         <>
-                          <button
-                            onClick={() => openPayModal(b)}
-                            className="btn btn-primary btn-sm"
-                            style={{ fontSize: 12 }}
-                          >
-                            <QrCode size={14} /> Thanh toán
-                          </button>
+                          {b.status === 'pending' && (
+                            <button
+                              onClick={() => openPayModal(b)}
+                              className="btn btn-primary btn-sm"
+                              style={{ fontSize: 12 }}
+                            >
+                              <QrCode size={14} /> Thanh toán
+                            </button>
+                          )}
                           <button
                             onClick={() => setCancelBooking(b)}
                             className="btn btn-sm"
@@ -346,7 +352,7 @@ export default function OrdersPage() {
       {/* Cancel Confirmation Modal */}
       {/* ══════════════════════════════════════════ */}
       {cancelBooking && (
-        <div className="modal-overlay" onClick={() => setCancelBooking(null)}>
+        <div className="modal-overlay" onClick={() => setCancelBooking(null)} style={{ alignItems: 'flex-start', paddingTop: 40 }}>
           <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: 420, textAlign: 'center' }}>
             <div style={{
               width: 64, height: 64, borderRadius: '50%',
@@ -399,9 +405,22 @@ export default function OrdersPage() {
                   fontSize: 14, cursor: 'pointer',
                 }}
               >
-                {cancelLoading ? <span className="spinner" /> : <><Ban size={16} /> Hủy đơn</>}
+                {cancelLoading ? <span className="spinner spinner-sm" /> : <><Ban size={16} /> Hủy đơn</>}
               </button>
             </div>
+
+            {cancelBooking.paid_amount > 0 && (
+              <div style={{ marginTop: 20, padding: 12, background: '#FFF5F5', borderRadius: 8, fontSize: 12, color: '#C53030', textAlign: 'left' }}>
+                <div style={{ fontWeight: 700, marginBottom: 4 }}>⚠️ Lưu ý hoàn tiền:</div>
+                <div>Đơn hàng đã thanh toán sẽ được hoàn tiền dựa trên chính sách hủy:</div>
+                <div style={{ marginTop: 4 }}>
+                  • Trong 2h sau đặt: <strong>Hoàn 100%</strong><br/>
+                  • Trước ngày nhận ≥ 3 ngày: <strong>Hoàn 50%</strong><br/>
+                  • Trong vòng 24h: <strong>Không hoàn tiền</strong>
+                </div>
+                <div style={{ marginTop: 8, fontWeight: 700 }}>Vui lòng gọi 0888888888 để được hỗ trợ hoàn tiền sau khi bấm Hủy.</div>
+              </div>
+            )}
           </div>
         </div>
       )}

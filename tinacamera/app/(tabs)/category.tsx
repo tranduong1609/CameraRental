@@ -107,12 +107,7 @@ export default function CategoryScreen() {
       style={{ flexDirection: 'row', backgroundColor: colors.cardBackground, borderRadius: 16, marginBottom: 12, overflow: 'hidden', borderWidth: 1, borderColor: colors.separator, marginHorizontal: 20 }}
       onPress={() => {
         if (!startDate) {
-          import('react-native').then(({ Alert }) => {
-            Alert.alert('Chưa chọn ngày thuê', 'Vui lòng quay lại Trang chủ để chọn khoảng thời gian thuê thiết bị trước khi xem chi tiết.', [
-              { text: 'Hủy', style: 'cancel' },
-              { text: 'Về Trang chủ', onPress: () => router.push('/(tabs)') }
-            ]);
-          });
+          router.push({ pathname: '/(tabs)', params: { openCalendar: 'true' } });
         } else {
           router.push(`/product/${item._id}`);
         }

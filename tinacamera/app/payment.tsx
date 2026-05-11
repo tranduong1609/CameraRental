@@ -87,6 +87,8 @@ export default function PaymentScreen() {
   const handleSaveInfo = async () => {
     if (!editName.trim()) { Alert.alert('Lỗi', 'Vui lòng nhập họ và tên.'); return; }
     if (!editPhone.trim()) { Alert.alert('Lỗi', 'Vui lòng nhập số điện thoại.'); return; }
+    if (!/^(0[3-9][0-9]{8})$/.test(editPhone.trim())) { Alert.alert('Lỗi', 'Số điện thoại không hợp lệ (VD: 0899259410).'); return; }
+    if (editEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editEmail.trim())) { Alert.alert('Lỗi', 'Email không đúng định dạng (VD: name@example.com).'); return; }
 
     setSaving(true);
     try {

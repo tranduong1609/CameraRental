@@ -4,11 +4,10 @@ import { useAuth } from '../contexts/AuthContext';
 import { Camera, ShoppingCart, Users, DollarSign, TrendingUp, Calendar, BarChart2, ArrowUpRight } from 'lucide-react';
 
 const PERIOD_OPTIONS = [
-  { key: 'day',    label: '7 ngày' },
-  { key: 'week',   label: '8 tuần' },
-  { key: 'month',  label: '6 tháng' },
-  { key: 'all',    label: 'Tất cả' },
-  { key: 'custom', label: 'Tùy chọn' },
+  { key: 'today',         label: 'Hôm nay' },
+  { key: 'month_current', label: 'Tháng này' },
+  { key: 'month3',        label: '3 tháng' },
+  { key: 'custom',        label: 'Tùy chọn' },
 ];
 
 function formatPrice(n?: number) {
@@ -19,7 +18,11 @@ function formatPrice(n?: number) {
 
 function formatLabel(label: string, period: string) {
   if (!label) return '';
-  if (period === 'day' || period === 'custom') {
+  if (period === 'today') {
+    // HH:00 → HHh
+    return label;
+  }
+  if (period === 'day' || period === 'custom' || period === 'month_current') {
     // YYYY-MM-DD → DD/MM
     const parts = label.split('-');
     return parts.length === 3 ? `${parts[2]}/${parts[1]}` : label;
@@ -66,7 +69,7 @@ export default function AdminDashboardPage() {
   const { token } = useAuth();
   const [stats, setStats] = useState<any>(null);
   const [revenue, setRevenue] = useState<any>(null);
-  const [period, setPeriod] = useState<'day' | 'week' | 'month' | 'all' | 'custom'>('month');
+  const [period, setPeriod] = useState<string>('month_current');
   const [loading, setLoading] = useState(true);
   const [chartLoading, setChartLoading] = useState(false);
   const [tooltip, setTooltip] = useState<any>({ visible: false });

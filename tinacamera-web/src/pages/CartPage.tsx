@@ -132,23 +132,23 @@ export default function CartPage() {
 
   // ── Payment Success ──
   if (paymentStep === 'success') return (
-    <div className="container section empty-state animate-fade-in">
+    <div className="container section empty-state animate-fade-in" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
       <div style={{
         width: 80, height: 80, borderRadius: '50%', background: 'linear-gradient(135deg, #10B981, #059669)',
         display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24,
       }}>
         <CheckCircle size={40} color="white" />
       </div>
-      <div className="empty-state-title" style={{ color: '#10B981' }}>Thanh toán thành công!</div>
-      <p style={{ color: 'var(--text-muted)', marginBottom: 8, maxWidth: 400 }}>
+      <div className="empty-state-title" style={{ color: '#10B981', fontSize: 28, fontWeight: 800, marginBottom: 16 }}>Thanh toán thành công!</div>
+      <p style={{ color: 'var(--text-muted)', marginBottom: 12, maxWidth: 500, fontSize: 16 }}>
         Đơn thuê của bạn đã được xác nhận. Cửa hàng sẽ liên hệ để giao máy hoặc bạn có thể đến nhận trực tiếp.
       </p>
-      <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 24 }}>
-        Mã giao dịch: <strong>{transactionId}</strong>
+      <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 32 }}>
+        Mã giao dịch: <strong style={{ color: 'var(--text)' }}>{transactionId}</strong>
       </p>
-      <div style={{ display: 'flex', gap: 12 }}>
-        <Link to="/orders" className="btn btn-primary">Xem đơn thuê</Link>
-        <Link to="/products" className="btn btn-secondary">Tiếp tục thuê</Link>
+      <div style={{ display: 'flex', gap: 16 }}>
+        <Link to="/orders" className="btn btn-primary btn-lg">Xem đơn thuê</Link>
+        <Link to="/products" className="btn btn-secondary btn-lg">Tiếp tục thuê</Link>
       </div>
     </div>
   );

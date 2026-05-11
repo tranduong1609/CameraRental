@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, TextInput, RefreshControl, ActivityIndicator, Alert, StyleSheet, Modal, Platform, Dimensions, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
@@ -50,6 +50,7 @@ export default function AdminOrders() {
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
   const [pendingBookingForScan, setPendingBookingForScan] = useState<any>(null);
   const [updating, setUpdating] = useState(false);
+  const isScannedRef = useRef(false);
 
   const s = useMemo(() => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
@@ -139,6 +140,7 @@ export default function AdminOrders() {
       // Đóng modal detail trước để tránh xung đột Modal trên Android
       setPendingBookingForScan(selectedBooking);
       setSelectedBooking(null);
+      isScannedRef.current = false;
       setTimeout(() => {
         setQrScanned(false);
         setShowQrScanner(true);
@@ -158,7 +160,8 @@ export default function AdminOrders() {
   };
 
   const handleBarCodeScanned = ({ data }: { data: string }) => {
-    if (qrScanned) return;
+    if (isScannedRef.current) return;
+    isScannedRef.current = true;
     setQrScanned(true);
     setShowQrScanner(false);
     const parsed = parseCccdQr(data);

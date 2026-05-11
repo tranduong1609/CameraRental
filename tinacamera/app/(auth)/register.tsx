@@ -51,6 +51,10 @@ export default function RegisterScreen() {
       Alert.alert('Lỗi', 'Vui lòng điền đầy đủ thông tin.');
       return;
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      Alert.alert('Lỗi', 'Email không đúng định dạng (VD: name@example.com).');
+      return;
+    }
     if (password !== confirmPassword) {
       Alert.alert('Lỗi', 'Mật khẩu xác nhận không khớp.');
       return;

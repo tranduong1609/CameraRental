@@ -15,6 +15,7 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !email || !password) { setError('Vui lòng điền đầy đủ thông tin.'); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError('Email không đúng định dạng.'); return; }
     if (password.length < 6) { setError('Mật khẩu ít nhất 6 ký tự.'); return; }
     setLoading(true); setError('');
     const res = await register(name, email, password);
